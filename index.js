@@ -5,7 +5,7 @@ app.get('/', (req, res) => {
     res.send('Hello, World!');
 });
 
-app.post('/api/capm', (req, res) => {
+app.get('/api/capm', (req, res) => {
     res.send('Hello, World!')
 });
 
