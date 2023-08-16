@@ -3,7 +3,7 @@ import pandas as pd
 import scipy as sc
 import sklearn
 import statsmodels.api as sm
-from js import calculate_capm, console, document
+from js import calculate_capm, structure_data, console, document
 from pyodide.ffi.wrappers import add_event_listener
 # Capm
 # The Formula for CAPM: Expected Return = (Beta * (Return of the Market - Risk Free Rate)) + Risk free rate
@@ -18,7 +18,7 @@ from pyodide.ffi.wrappers import add_event_listener
 """
 
 def company_data(*args):
-    data = calculate_capm()
+    data = structure_data()
     console.log(data)
     
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
