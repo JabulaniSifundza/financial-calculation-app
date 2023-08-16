@@ -8,7 +8,7 @@ app.get('/home', (req, res) => {
 });
 
 app.post('/api/capm', (req, res) => {
-    res.send('Hello, World!')
+res.status(200).json({msg: "What's good?"})
 });
 
 app.get('/my-html-file', (req, res) => {
