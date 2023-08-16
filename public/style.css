@@ -1,0 +1,95 @@
+:root{
+    --primary-color: #2F98E7;
+    --secondary-color: #FFFFFF;
+    --link-color: #0079C5;
+    --darker: #005BA3;
+    --red: #AC0202;
+    --highlight-text: #004083;
+	--placeholder-text:#002664;
+}
+
+body{
+    background-color: var(--secondary-color);
+}
+
+header{
+    display: flex;
+    top: 0.5%;
+    flex-direction: row;
+    justify-content: center;
+    position: fixed;
+    margin-left: -7.5px;
+    width: 100vw;
+    margin-bottom: 45px;
+}
+
+.header-logo{
+    width: 60px;
+	height: 60px;
+	margin-right: auto;
+    margin-left: auto;
+    cursor: pointer;
+}
+
+footer{
+    background-color: var(--darker);
+    position: fixed;
+    z-index: 2;
+    bottom: 0;
+    width: 100vw;
+    height: 87px;
+    display: grid;
+    margin-left: -7.5px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+    border-radius: 15px;
+    border-top: 1.5px solid var(--placeholder-text);
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 2px 4px 0px, rgba(60, 64, 67, 0.15) 0px 4px 9px 4px;
+}
+
+.footer-btn{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-top: 12px
+}
+
+.footer-btn p{
+    text-align: center;
+    margin-right: auto;
+    margin-left: auto;
+    font-family: 'Jappokki', sans-serif;
+    font-size: 12px;
+    margin-top: 6px;
+    align-self: center;
+    justify-self: center;
+    color: var(--secondary-color)
+}
+
+
+.footer-btn .material-symbols-rounded{
+    margin-right: auto;
+    margin-left: auto;
+    color: var(--secondary-color);
+    font-size: 42px;
+    cursor: pointer;
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 700,
+    'GRAD' 200,
+    'opsz' 48
+}
+
+.footer-btn .material-symbols-sharp{
+    margin-right: auto;
+    margin-left: auto;
+    color: var(--secondary-color);
+    font-size: 42px;
+    cursor: pointer;
+    font-variation-settings:
+    'FILL' 1,
+    'wght' 700,
+    'GRAD' 200,
+    'opsz' 48
+}
