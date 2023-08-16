@@ -31,7 +31,7 @@ async function calculate_capm(){
         })
     })
     const data = await response.json()
-    return data
+    console.log(data)
 }
 
 document.getElementById("test-btn").addEventListener("click", ()=>{
