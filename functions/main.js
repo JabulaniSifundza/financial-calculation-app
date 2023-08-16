@@ -7,6 +7,10 @@ document.getElementById("add-ticker-btn").addEventListener("click", ()=>{
     ticker_inputs.appendChild(new_ticker)
 })
 
+function structure_data(){
+    return calculate_capm()
+}
+
 async function calculate_capm(){
     const ticker_symbols = document.getElementsByName("ticker-symbol")
     const ticker_symbols_list = []
@@ -29,6 +33,10 @@ async function calculate_capm(){
     const data = await response.json()
     return data
 }
+
+document.getElementById("search-companies-btn").addEventListener("click", ()=>{
+    calculate_capm()
+})
 
 function turner(){
     return "William Turner"
