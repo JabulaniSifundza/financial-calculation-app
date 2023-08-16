@@ -34,7 +34,7 @@ async function calculate_capm(){
     return data
 }
 
-document.getElementById("search-companies-btn").addEventListener("click", ()=>{
+document.getElementById("test-btn").addEventListener("click", ()=>{
     calculate_capm()
 })
 
