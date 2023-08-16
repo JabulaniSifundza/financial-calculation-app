@@ -10,5 +10,16 @@
     { "src": "/projections", "dest": "index.js" },
     { "src": "/monte", "dest": "index.js" },
     { "src": "/(.*)", "dest": "/public/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/style.css",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/css"
+        }
+      ]
+    }
   ]
 }
