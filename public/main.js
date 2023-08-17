@@ -30,8 +30,19 @@ async function calculate_capm(){
             benchmark_ticker: selected_benchmark
         })
     })
+    //console.log(ticker_symbols_list)
     const data = await response.json()
-    console.log(data)
+    //console.log(data)
+    const company_data = data.company_result
+    const benchmark_data = data.benchmark_data
+    const risk_free_data = data.risk_free_data
+    const company_beta_values = data.beta_result
+    const stock_prices = JSON.stringify(company_data)
+    const benchmark_prices = JSON.stringify(benchmark_data)
+    const risk_free_rate = JSON.stringify(risk_free_data)
+    const beta_data = JSON.stringify(company_beta_values)
+    //console.log(beta_data)
+    return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
 }
 
 document.getElementById("test-btn").addEventListener("click", ()=>{
