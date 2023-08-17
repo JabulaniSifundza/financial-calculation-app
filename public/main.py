@@ -47,7 +47,6 @@ async def company_data(*args):
             Y = benchmark_df['close'].pct_change().mean() * 252
             market_return_arr.append({industry_avg: Y})
             avg_return_arr.append({symbol: X, industry_avg: Y})
-    # print(market_return_arr)
     for obj in avg_return_arr:
         for obj_key, obj_val in obj.items():
             if obj_key in beta_values:
@@ -56,16 +55,6 @@ async def company_data(*args):
                 new_p.innerHTML = f"Ticker symbol: {obj_key} <br> Average rate of return(annual): {round(obj_val * 100, 2)}% <br> Stock beta: {round(beta_values[obj_key], 2)} <br> CAPM: {round(float((beta_values[obj_key]) * ((float(market_return_arr[0][benchmark_symbol]) * 100)) - risk_free_rate[0]['close']) + risk_free_rate[0]['close'], 2)}%"
                 div_to_insert = js.document.querySelector('#div-to-insert')
                 div_to_insert.appendChild(new_p)
-                print(f"key: {obj_key}, value: {obj_val}")
-                # print(f"{obj_key}, {round(obj_val * 100, 2)}, {beta_values[obj_key]}, {float((beta_values[obj_key]) * ((float(market_return_arr[0][benchmark_symbol]) * 100)) - risk_free_rate[0]['close']) + risk_free_rate[0]['close']}")
-    # print(beta_values)
-    # print(avg_return_arr)
-    # print(benchmark_symbol)
-    # print(risk_free_rate[0]['close'])
-    print(beta_values)
-    print(market_return_arr)
-    
-# Run the main function
+                
+
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
-# {float((beta_values[obj_key]) * ((float(market_return_arr[0][benchmark_symbol]) * 100)) - risk_free_rate[0]['close']) + risk_free_rate[0]['close']}
-# benchmark_value: {market_return_arr[0][benchmark_symbol]}
