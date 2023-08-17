@@ -1,10 +1,12 @@
 import numpy as np
 import pandas as pd
 import scipy as sc
-import sklearn
+from sklearn.model_selection import train_test_split 
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
 import statsmodels.api as sm
 import json
-from js import calculate_capm, structure_data, console, document
+from js import calculate_capm, structure_data, console, document, structure_simple_model_data
 from pyodide.ffi.wrappers import add_event_listener
 import pyodide
 # Capm
@@ -55,6 +57,35 @@ async def company_data(*args):
                 new_p.innerHTML = f"Ticker symbol: {obj_key} <br> Average rate of return(annual): {round(obj_val * 100, 2)}% <br> Stock beta: {round(beta_values[obj_key], 2)} <br> CAPM: {round(float((beta_values[obj_key]) * ((float(market_return_arr[0][benchmark_symbol]) * 100)) - risk_free_rate[0]['close']) + risk_free_rate[0]['close'], 2)}%"
                 div_to_insert = js.document.querySelector('#div-to-insert')
                 div_to_insert.appendChild(new_p)
+                
+                
+                
+"""
+Linear Regression
+- Predicting Stock Prices using a linear regression model
+- Features: Volume and Open
+"""
+
+async def simple_model_data(*args):
+    model_data = await structure_simple_model_data()
+    df_data = json.loads(model_data)
+    df_data_keys = list(df_data.keys())
+    model_dataframe = pd.DataFrame(df_data)
+    model_dataframe = model_dataframe.set_index(['date'])
+    X = model_dataframe[['volume', 'open']].values
+    Y = model_dataframe['close']
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
+    regressor = LinearRegression()
+    regressor.fit(X_train, Y_train)
+    y_pred = regressor.predict(X_test)
+    
+    print('Mean Absolute Error:', metrics.mean_absolute_error(Y_test, y_pred))  
+    print('Mean Squared Error:', metrics.mean_squared_error(Y_test, y_pred))  
+    print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
+
+       
+
+
                 
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
