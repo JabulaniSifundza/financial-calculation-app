@@ -41,7 +41,7 @@ async function calculate_capm(){
     const benchmark_prices = JSON.stringify(benchmark_data)
     const risk_free_rate = JSON.stringify(risk_free_data)
     const beta_data = JSON.stringify(company_beta_values)
-    //console.log(beta_data)
+    console.log(beta_data)
     return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
 }
 
