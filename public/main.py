@@ -3,7 +3,8 @@ import pandas as pd
 import scipy as sc
 from sklearn.model_selection import train_test_split 
 from sklearn.linear_model import LinearRegression
-from sklearn import metrics
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import precision_score
 import statsmodels.api as sm
 import json
 from js import calculate_capm, structure_simple_model_data, structure_data, console, document
@@ -40,7 +41,7 @@ async def company_data(*args):
         stock_price_data = companies[symbol]
         stock_price_df = pd.DataFrame(stock_price_data)
         stock_price_df = stock_price_df.set_index(['date'])
-        X = stock_price_df['close'].pct_change().mean() * 252
+        X = stock_price_df['adjClose'].pct_change().mean() * 252
         # avg_return_arr.append({symbol: X})
         for industry_avg in benchmark_ticker:
             benchmark_data = benchmark[industry_avg]
@@ -87,9 +88,51 @@ async def simple_model_data(*args):
 async def simple_model_data(*args):
     model_data = await structure_simple_model_data()
     df_data = json.loads(model_data)
-    df_data_keys = list(df_data.keys())
-    print(df_data_keys)
+    model_DF = pd.DataFrame(df_data['data'])
+    model_DF = model_DF.set_index(['date'])
+    model_DF["Tomorrow"] = model_DF["adjClose"].shift(-1)
+    model_DF["Target"] = (model_DF["Tomorrow"] > model_DF["adjClose"]).astype(int)
     
+    model = RandomForestClassifier(n_estimators=250, min_samples_split=50, random_state=1)
+    # X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
+    predictors = ["adjClose", "volume", "open", "high", "low"]
+    console.log(precision_score(predictions["Target"], predictions["Predictions"]))
+    
+    # Improving the model. Using moving averages
+    horizons = [2, 5, 60, 250, 1000]
+    new_predictors = []
+    for horizon in horizons:
+        rolling_averages = model_DF.rolling(horizon).mean()
+        ratio_column = f"Close_Ratio_{horizon}"
+        model_DF[ratio_column] = model_DF["adjClose"] / rolling_averages["adjClose"]
+        trend_column = f"Trend_{horizon}"
+        model_DF[trend_column] = model_DF.shift(1)
+        new_predictors += [ratio_column, trend_column]
+    model_DF = model_DF.dropna()
+    predictions = backtest(model_DF, model, new_predictors)
+    predictions["Predictions"].value_counts()
+    console.log(precision_score(predictions["Target"], predictions["Predictions"]))
+    
+    
+def predict(train, test, predictors, model):
+    model.fit(train[predictors], train["Target"])
+    preds = model.predict_proba(train[predictors])[:,1]
+    preds[preds >= .6] = 1
+    preds[preds < .6] = 0
+    preds = pd.Series(preds, index=test.index, name="Predictions")
+    return pd.concat([test["Target"], preds], axis=1)
+
+def backtest(data, model, predictors, start=2500, step=250):
+    all_predictions = []
+    for i in range(start, data.shape[0], step):
+        train = data.iloc[:i].copy()
+        test = data.iloc[i:(i+step)].copy()
+        predictions = predict(train, test, predictors, model)
+        all_predictions.append(predictions)
+    return pd.concat(all_predictions)
+
+
+
 
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
