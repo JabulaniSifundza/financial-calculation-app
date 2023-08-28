@@ -8,6 +8,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json())
 app.use(express.static('public'));
 
+const stock_ticker_data = {}
+
 app.get('/home', (req, res) => {
     //res.send('Hello, World!');
     res.sendFile(__dirname + '/public/index.html');
@@ -30,6 +32,7 @@ app.post('/api/capm', async(req, res) => {
         for(const symbol of ticker_symbols){
             //company_result.push(await yahooFinance.historical(symbol, query_options))
             const ticker_data = await yahooFinance.historical(symbol, query_options)
+            stock_ticker_data[symbol] = ticker_data
             company_result[symbol] = ticker_data
         }
 
@@ -43,6 +46,17 @@ app.post('/api/capm', async(req, res) => {
         res.status(500).json({error: error.name, msg: error.message})
     }
 });
+
+app.post('/api/simple', async(req, res)=>{
+    const {ticker_symbol} = req.body
+    try{
+        const data = stock_ticker_data[ticker_symbol]
+        res.status(200).json({data})
+    }
+    catch(error){
+        res.status(500).json({error: error.name, msg: error.message})
+    }
+})
 
 app.get('/my-html-file', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');

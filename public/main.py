@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 import statsmodels.api as sm
 import json
-from js import calculate_capm, structure_data, console, document, structure_simple_model_data
+from js import calculate_capm, structure_data, console, document
 from pyodide.ffi.wrappers import add_event_listener
 import pyodide
 # Capm
@@ -64,7 +64,6 @@ async def company_data(*args):
 Linear Regression
 - Predicting Stock Prices using a linear regression model
 - Features: Volume and Open
-"""
 
 async def simple_model_data(*args):
     model_data = await structure_simple_model_data()
@@ -83,9 +82,7 @@ async def simple_model_data(*args):
     print('Mean Squared Error:', metrics.mean_squared_error(Y_test, y_pred))  
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
 
-       
+"""
 
-
-                
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
