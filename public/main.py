@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 import statsmodels.api as sm
 import json
-from js import calculate_capm, structure_data, console, document
+from js import calculate_capm, structure_simple_model_data, structure_data, console, document
 from pyodide.ffi.wrappers import add_event_listener
 import pyodide
 # Capm
@@ -84,5 +84,13 @@ async def simple_model_data(*args):
 
 """
 
+async def simple_model_data(*args):
+    model_data = await structure_simple_model_data()
+    df_data = json.loads(model_data)
+    df_data_keys = list(df_data.keys())
+    print(df_data_keys)
+    
+
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
+add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)

@@ -14,13 +14,16 @@ function structure_data(){
 async function calculate_capm(){
     try{
         const ticker_symbols = document.getElementsByName("ticker-symbol")
-        const ticker_symbols_list = []
         const benchmark_selector = document.getElementById("benchmark")
-        const select_elem = document.getElementById("model-ticker-selector")
-
+        const select_elem = document.getElementById("simple-model-ticker-selector")
+        const ticker_symbols_list = []
         const selected_benchmark = benchmark_selector.options[benchmark_selector.selectedIndex].value
         ticker_symbols.forEach(ticker_symbol => {
             ticker_symbols_list.push(ticker_symbol.value)
+            const symbol_option = `<option value=${ticker_symbol.value}>${ticker_symbol.value}</option>`
+            const option_element = document.createElement('option')
+            option_element.innerHTML = symbol_option
+            select_elem.appendChild(option_element)
         })
         const response = await fetch("/api/capm", {
             method: "POST",
@@ -43,12 +46,6 @@ async function calculate_capm(){
         const benchmark_prices = JSON.stringify(benchmark_data)
         const risk_free_rate = JSON.stringify(risk_free_data)
         const beta_data = JSON.stringify(company_beta_values)
-        for(const symbol of ticker_symbols_list){
-            const symbol_option = `<option value=${symbol}>${symbol}</option>`
-            const option_element = document.createElement('option')
-            option_element.innerHTML = symbol_option
-            select_elem.appendChild(option_element)
-        }
         //console.log(beta_data)
         return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
 
@@ -58,9 +55,6 @@ async function calculate_capm(){
     }
 }
 
-document.getElementById("test-btn").addEventListener("click", ()=>{
-    calculate_capm()
-})
 
 function turner(){
     return "William Turner"
@@ -81,7 +75,7 @@ async function structure_simple_model_data(){
             })
         })
         const data = await response.json()
-        const symbol_data = data.company_result
+        const symbol_data = data
         const price_data = JSON.stringify(symbol_data)
         console.log(price_data)
         return [price_data]
@@ -90,8 +84,3 @@ async function structure_simple_model_data(){
         console.log(error)
     }
 }
-
-
-document.getElementById("create-simple-model").addEventListener("click", ()=>{
-    structure_simple_model_data()
-})
