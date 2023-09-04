@@ -84,55 +84,66 @@ async def simple_model_data(*args):
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
 
 """
+def simple_predictions(model, inpts):
+    prediction = model.predict([[*inpts]])
+    
 
 async def simple_model_data(*args):
-    model_data = await structure_simple_model_data()
-    df_data = json.loads(model_data)
+    return await structure_simple_model_data()
+
+def create_simple_model(model_dataframe):
+    df_data = json.loads(model_dataframe)
     model_DF = pd.DataFrame(df_data['data'])
     model_DF = model_DF.set_index(['date'])
     model_DF["Tomorrow"] = model_DF["adjClose"].shift(-1)
     model_DF["Target"] = (model_DF["Tomorrow"] > model_DF["adjClose"]).astype(int)
-    
     model = RandomForestClassifier(n_estimators=250, min_samples_split=50, random_state=1)
-    # X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2, random_state = 0)
-    predictors = ["adjClose", "volume", "open", "high", "low"]
-    console.log(precision_score(predictions["Target"], predictions["Predictions"]))
-    
-    # Improving the model. Using moving averages
-    horizons = [2, 5, 60, 250, 1000]
-    new_predictors = []
-    for horizon in horizons:
-        rolling_averages = model_DF.rolling(horizon).mean()
-        ratio_column = f"Close_Ratio_{horizon}"
-        model_DF[ratio_column] = model_DF["adjClose"] / rolling_averages["adjClose"]
-        trend_column = f"Trend_{horizon}"
-        model_DF[trend_column] = model_DF.shift(1)
-        new_predictors += [ratio_column, trend_column]
-    model_DF = model_DF.dropna()
-    predictions = backtest(model_DF, model, new_predictors)
-    predictions["Predictions"].value_counts()
-    console.log(precision_score(predictions["Target"], predictions["Predictions"]))
-    
-    
-def predict(train, test, predictors, model):
+    train = model_DF.iloc[:-100]
+    test = model_DF.iloc[-100:]
+    predictors = ["open", "high", "low", "adjClose", "volume"]
     model.fit(train[predictors], train["Target"])
-    preds = model.predict_proba(train[predictors])[:,1]
-    preds[preds >= .6] = 1
-    preds[preds < .6] = 0
-    preds = pd.Series(preds, index=test.index, name="Predictions")
-    return pd.concat([test["Target"], preds], axis=1)
+    preds = model.predict(test[predictors])
+    preds = pd.Series(preds, index=test.index)
+    print(precision_score(test["Target"], preds))
+    model_accuracy = precision_score(test["Target"], preds)
+    model_acc_txt = f"Your model is {round((model_accuracy * 100), 2)}% accurate"
+    model_acc_p = js.document.createElement("p")
+    model_acc_p.innerHTML = model_acc_txt
+    model_acc_div = js.document.querySelector('#model-accuracy')
+    model_acc_div.appendChild(model_acc_p)
+    return model
+    
 
-def backtest(data, model, predictors, start=2500, step=250):
-    all_predictions = []
-    for i in range(start, data.shape[0], step):
-        train = data.iloc[:i].copy()
-        test = data.iloc[i:(i+step)].copy()
-        predictions = predict(train, test, predictors, model)
-        all_predictions.append(predictions)
-    return pd.concat(all_predictions)
+def create_model_inpts():
+    open_pred = create_model_inpts('Open', 'prediction-open')
+    high_pred = create_model_inpts('High', 'prediction-high')
+    low_pred = create_model_inpts('Low', 'prediction-low')
+    close_pred = create_model_inpts('Close', 'prediction-close')
+    vol_pred = create_model_inpts('Volume', 'prediction-volume')
+    pred_div = js.document.querySelector('#prediction-data')
+    pred_div.appendChild(open_pred)
+    pred_div.appendChild(high_pred)
+    pred_div.appendChild(low_pred)
+    pred_div.appendChild(close_pred)
+    pred_div.appendChild(vol_pred)
+    pred_btn = js.document.querySelector('#make-prediction')
+    pred_btn.style.display = "block"
 
-
-
+# TODO Rename this here and in `create_model_inpts`
+def create_model_inpts(attr, val):
+    result = js.document.createElement("input")
+    result.setAttribute('type', 'number')
+    result.setAttribute('placeholder', attr)
+    result.setAttribute('id', val)
+    return result
+    
+def get_prediction_vals():
+    open_value = js.document.getElementById("prediction-open").value
+    high_value = js.document.getElementById("prediction-high").value
+    low_value = js.document.getElementById("prediction-low").value
+    close_value = js.document.getElementById("prediction-close").value
+    volume_value = js.document.getElementById("prediction-volume").value
+    return (open_value, high_value, low_value, close_value, volume_value)
 
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)

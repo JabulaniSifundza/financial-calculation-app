@@ -21,7 +21,7 @@ app.post('/api/capm', async(req, res) => {
         const company_result = {}
         const benchmark_data = {}
         const beta_result = {}
-        const query_options = { period1: '2018-02-01', period2: '2023-02-01'}
+        const query_options = { period1: '2005-02-01'}
         const risk_free_query_options = { period1: '2023-08-14', period2: '2023-08-15'}
         const beta_data_query_options = { modules: ['summaryDetail'] };
 

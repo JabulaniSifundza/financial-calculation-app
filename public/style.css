@@ -93,3 +93,7 @@ footer{
     'GRAD' 200,
     'opsz' 48
 }
+
+#make-prediction{
+    display: none;
+}
