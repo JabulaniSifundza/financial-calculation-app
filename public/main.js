@@ -114,9 +114,8 @@ async function get_financial_data(){
             })
         })
         const data = await response.json()
-        const symbol_data = data
-        const financial_data = JSON.stringify(symbol_data)
-        console.log(financial_data)
+        const financial_data = data
+        //console.log(financial_data)
         return financial_data
     }
     catch(error){
@@ -125,6 +124,109 @@ async function get_financial_data(){
     }
 }
 
-document.getElementById("get-company-financial-data").addEventListener("click", ()=>{
-    get_financial_data()
+document.getElementById("get-company-financial-data").addEventListener("click", async()=>{
+    const data = await get_financial_data()
+    //console.log(data['data'])
+    // Destructure financial document array
+    const [balance_sheets, cash_flow_statements, income_statements, current_financial_data] = data['data']
+    //console.log(current_financial_data)
+
+    // Destructure balance sheet array
+    const [fourth_year_balance_sheet, third_year_balance_sheet, second_year_balance_sheet, first_year_balance_sheet] = balance_sheets["balanceSheetStatements"]
+    const [fourth_year_cash_flow_sheet, third_year_cash_flow_sheet, second_year_cash_flow_sheet, first_year_cash_flow_sheet] = cash_flow_statements["cashflowStatements"]
+    const [fourth_year_income_statement_sheet, third_year_income_statement_sheet, second_year_income_statement_sheet, first_year_income_statement_sheet] = income_statements["incomeStatementHistory"]
+
+    console.log(fourth_year_balance_sheet)
+    console.log(fourth_year_cash_flow_sheet)
+    console.log(fourth_year_income_statement_sheet)
+
+    // Define your pie layout
+    var pie = d3.pie()
+        .value(function(d) { return d.count; });
+
+    // Define your arc generator
+    var arc = d3.arc()
+        .innerRadius(0)
+        .outerRadius(radius);
+
+    // Create your SVG container
+    var svg = d3.select("body")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    const balance_sheet_data = [
+        {asset: "Cash", amount: fourth_year_balance_sheet["cash"]},
+        {asset: "Inventory", amount: fourth_year_balance_sheet["inventory"]},
+        {asset: "Receivables", amount: fourth_year_balance_sheet["netReceivables"]},
+        {asset: "Other Current Assets", amount: fourth_year_balance_sheet["otherCurrentAssets"]}
+    ]
+
+    var width = 360,
+    height = 360,
+    radius = Math.min(width, height) / 2;
+
+    console.log("width:", width, "height:", height);
+
+    var color = d3.scaleOrdinal()
+        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
+
+    var arc = d3.arc()
+        .outerRadius(radius - 30)
+        .innerRadius(8);
+
+    var pie = d3.pie()
+        .sort(null)
+        .value(function(d) { return d.amount; });
+
+    var svg = d3.select("#data-visualizations").append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .append("g")
+        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+
+    var g = svg.selectAll(".arc")
+        .data(pie(balance_sheet_data))
+        .enter().append("g")
+        .attr("class", "arc");
+
+        var labelArc = d3.arc()
+        .outerRadius(radius + 6)
+        .innerRadius(radius + 6);
+
+        g.append("path")
+            .attr("d", arc)
+            .style("fill", function(d) { return color(d.data.asset); })
+            .on("mouseover", function(d) {
+            var dist = 10;
+            d3.select(this).attr("transform", "translate(" + arc.centroid(d).map(function(d) { return d/dist; }) + ")");
+            })
+            .on("mouseout", function() {
+                d3.select(this).attr("transform", "translate(0,0)");
+            });
+            
+        
+
+        g.append("text")
+            .attr("transform", function(d) { return "translate(" + labelArc.centroid(d)[0] + ")"; })
+            .attr("dy", ".2em")
+            .style("text-anchor", "middle")
+            .text(function(d) { return d.data.asset; });
+
+        g.append("line")
+            .attr("stroke", "black")
+            .attr("x1", function(d) { return arc.centroid(d)[0]; })
+            .attr("y1", function(d) { return arc.centroid(d)[1]; })
+            .attr("x2", function(d) { return labelArc.centroid(d)[0]; })
+            .attr("y2", function(d) { return labelArc.centroid(d)[1]; });
+})
+
+var elements = document.querySelectorAll('svg')
+
+anime({
+    targets: elements,
+    translateX: [270, 320, 0]
+
 })

@@ -24,7 +24,7 @@ app.post('/api/capm', async(req, res) => {
         const beta_result = {}
         const query_options = { period1: '2005-01-01'}
         const risk_free_query_options = { period1: '2023-08-14', period2: '2023-08-15'}
-        const beta_data_query_options = { modules: ['summaryDetail', 'balanceSheetHistoryQuarterly', 'cashflowStatementHistoryQuarterly', 'incomeStatementHistoryQuarterly', 'financialData'] };
+        const beta_data_query_options = { modules: ['summaryDetail', 'balanceSheetHistory', 'cashflowStatementHistory',  'incomeStatementHistory', 'financialData'] };
 
         const risk_free_data = await yahooFinance.historical("^TNX", risk_free_query_options)
         const benchmark_result = await yahooFinance.historical(benchmark_ticker, query_options)
@@ -40,7 +40,7 @@ app.post('/api/capm', async(req, res) => {
         for(const ticker of ticker_symbols){
             const financial_data = await yahooFinance.quoteSummary(ticker, beta_data_query_options)
             beta_result[ticker] = financial_data.summaryDetail.beta
-            company_financial_data[ticker] = [financial_data.balanceSheetHistoryQuarterly, financial_data.cashflowStatementHistoryQuarterly, financial_data.financialData, financial_data.incomeStatementHistoryQuarterly]
+            company_financial_data[ticker] = [financial_data.balanceSheetHistory, financial_data.cashflowStatementHistory, financial_data.incomeStatementHistory, financial_data.financialData]
         }
         res.status(200).json({benchmark_data, company_result, risk_free_data, beta_result})
     }
