@@ -94,6 +94,10 @@ footer{
     'opsz' 48
 }
 
-#make-prediction{
+#make-simple-pred-btn{
     display: none;
+}
+
+.main-container{
+    margin-bottom: 300px;
 }

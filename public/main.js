@@ -77,7 +77,7 @@ async function structure_simple_model_data(){
         const data = await response.json()
         const symbol_data = data
         const price_data = JSON.stringify(symbol_data)
-        console.log(price_data)
+        //console.log(price_data)
         return price_data
     }
     catch(error){

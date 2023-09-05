@@ -84,14 +84,21 @@ async def simple_model_data(*args):
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
 
 """
-def simple_predictions(model, inpts):
-    prediction = model.predict([[*inpts]])
-    
+model_global = None
+global_model = None
 
+def simple_predictions(model, inpts):
+    return model.predict(inpts)
+     
 async def simple_model_data(*args):
-    return await structure_simple_model_data()
+    global global_model
+    model_dataframe = await structure_simple_model_data()
+    global_model = create_simple_model(model_dataframe)
+    return global_model
+
 
 def create_simple_model(model_dataframe):
+    # sourcery skip: inline-immediately-returned-variable, use-assigned-variable
     df_data = json.loads(model_dataframe)
     model_DF = pd.DataFrame(df_data['data'])
     model_DF = model_DF.set_index(['date'])
@@ -104,17 +111,19 @@ def create_simple_model(model_dataframe):
     model.fit(train[predictors], train["Target"])
     preds = model.predict(test[predictors])
     preds = pd.Series(preds, index=test.index)
-    print(precision_score(test["Target"], preds))
+    # print(precision_score(test["Target"], preds))
     model_accuracy = precision_score(test["Target"], preds)
     model_acc_txt = f"Your model is {round((model_accuracy * 100), 2)}% accurate"
     model_acc_p = js.document.createElement("p")
     model_acc_p.innerHTML = model_acc_txt
     model_acc_div = js.document.querySelector('#model-accuracy')
     model_acc_div.appendChild(model_acc_p)
+    model_global = model
+    add_model_inpts()
     return model
     
 
-def create_model_inpts():
+def add_model_inpts():
     open_pred = create_model_inpts('Open', 'prediction-open')
     high_pred = create_model_inpts('High', 'prediction-high')
     low_pred = create_model_inpts('Low', 'prediction-low')
@@ -126,7 +135,7 @@ def create_model_inpts():
     pred_div.appendChild(low_pred)
     pred_div.appendChild(close_pred)
     pred_div.appendChild(vol_pred)
-    pred_btn = js.document.querySelector('#make-prediction')
+    pred_btn = js.document.querySelector('#make-simple-pred-btn')
     pred_btn.style.display = "block"
 
 # TODO Rename this here and in `create_model_inpts`
@@ -143,8 +152,27 @@ def get_prediction_vals():
     low_value = js.document.getElementById("prediction-low").value
     close_value = js.document.getElementById("prediction-close").value
     volume_value = js.document.getElementById("prediction-volume").value
-    return (open_value, high_value, low_value, close_value, volume_value)
+    return pd.DataFrame(data=[[open_value, high_value, low_value, close_value, volume_value]], columns=["open", "high", "low", "adjClose", "volume"])
+
+def make_prediction(*args):  # sourcery skip: raise-specific-error
+    global global_model
+    inputs = get_prediction_vals()
+    if global_model is None:
+        raise Exception("Model is not created yet. Please create the model first.")
+    predicted_values = simple_predictions(global_model, inputs)
+    prediction_list = predicted_values.tolist()
+    result = js.document.createElement("p")
+    pred_div = js.document.querySelector('#prediction-verdict')
+    if prediction_list[0] == 1:
+        result.innerHTML = "The model's prediction/recommendation on this security is: Buy."
+    else:
+        result.innerHTML = "The model's prediction/recommendation on this security is: Don't Buy."
+    pred_div.appendChild(result)
+
+
 
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)
+add_event_listener(document.getElementById("make-simple-pred-btn"), "click", make_prediction)
+
