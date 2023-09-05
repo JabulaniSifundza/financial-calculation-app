@@ -9,6 +9,7 @@ app.use(express.json())
 app.use(express.static('public'));
 
 const stock_ticker_data = {}
+const company_financial_data = {}
 
 app.get('/home', (req, res) => {
     //res.send('Hello, World!');
@@ -23,7 +24,7 @@ app.post('/api/capm', async(req, res) => {
         const beta_result = {}
         const query_options = { period1: '2005-01-01'}
         const risk_free_query_options = { period1: '2023-08-14', period2: '2023-08-15'}
-        const beta_data_query_options = { modules: ['summaryDetail'] };
+        const beta_data_query_options = { modules: ['summaryDetail', 'balanceSheetHistoryQuarterly', 'cashflowStatementHistoryQuarterly', 'incomeStatementHistoryQuarterly', 'financialData'] };
 
         const risk_free_data = await yahooFinance.historical("^TNX", risk_free_query_options)
         const benchmark_result = await yahooFinance.historical(benchmark_ticker, query_options)
@@ -37,8 +38,9 @@ app.post('/api/capm', async(req, res) => {
         }
 
         for(const ticker of ticker_symbols){
-            const beta_value = await yahooFinance.quoteSummary(ticker, beta_data_query_options)
-            beta_result[ticker] = beta_value.summaryDetail.beta
+            const financial_data = await yahooFinance.quoteSummary(ticker, beta_data_query_options)
+            beta_result[ticker] = financial_data.summaryDetail.beta
+            company_financial_data[ticker] = [financial_data.balanceSheetHistoryQuarterly, financial_data.cashflowStatementHistoryQuarterly, financial_data.financialData, financial_data.incomeStatementHistoryQuarterly]
         }
         res.status(200).json({benchmark_data, company_result, risk_free_data, beta_result})
     }
@@ -51,6 +53,17 @@ app.post('/api/simple', async(req, res)=>{
     const {ticker_symbol} = req.body
     try{
         const data = stock_ticker_data[ticker_symbol]
+        res.status(200).json({data})
+    }
+    catch(error){
+        res.status(500).json({error: error.name, msg: error.message})
+    }
+})
+
+app.post('/api/company-financials', async(req, res)=>{
+    const {ticker_symbol} = req.body
+    try{
+        const data = company_financial_data[ticker_symbol]
         res.status(200).json({data})
     }
     catch(error){

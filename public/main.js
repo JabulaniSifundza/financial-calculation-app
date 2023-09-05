@@ -11,6 +11,18 @@ function structure_data(){
     return calculate_capm()
 }
 
+function create_symbol_selector(selector_id, option_array){
+    const ticker_symbols = document.getElementsByName(option_array)
+    const selector = document.getElementById(selector_id)
+    ticker_symbols.forEach(option =>{
+        const option_html = `<option value=${option.value}>${option.value}</option>`
+        const option_element = document.createElement('option')
+        option_element.innerHTML = option_html
+        selector.appendChild(option_element)
+        return selector.outerHTML
+    })
+}
+
 async function calculate_capm(){
     try{
         const ticker_symbols = document.getElementsByName("ticker-symbol")
@@ -46,12 +58,13 @@ async function calculate_capm(){
         const benchmark_prices = JSON.stringify(benchmark_data)
         const risk_free_rate = JSON.stringify(risk_free_data)
         const beta_data = JSON.stringify(company_beta_values)
+        create_symbol_selector("company-financials-selector", "ticker-symbol")
         //console.log(beta_data)
         return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
-
     }
     catch(error){
-        console.log(error)
+        console.log(error);
+        alert(`Unfortunately the following error has occurred: ${error}`);
     }
 }
 
@@ -82,5 +95,36 @@ async function structure_simple_model_data(){
     }
     catch(error){
         console.log(error)
+        alert(`Unfortunately the following error has occurred: ${error}`);
     }
 }
+
+async function get_financial_data(){
+    const company_selector = document.getElementById("company-financials-selector")
+    const selected_ticker = company_selector.options[company_selector.selectedIndex]
+    const symbol = selected_ticker.value
+    try{
+        const response = await fetch("/api/company-financials", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker_symbol: symbol
+            })
+        })
+        const data = await response.json()
+        const symbol_data = data
+        const financial_data = JSON.stringify(symbol_data)
+        console.log(financial_data)
+        return financial_data
+    }
+    catch(error){
+        console.log(error)
+        alert(`Unfortunately the following error has occurred: ${error}`);
+    }
+}
+
+document.getElementById("get-company-financial-data").addEventListener("click", ()=>{
+    get_financial_data()
+})
