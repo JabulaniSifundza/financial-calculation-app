@@ -164,18 +164,13 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
         {asset: "Other Current Assets", amount: fourth_year_balance_sheet["otherCurrentAssets"]}
     ]
 
-    var width = 360,
-    height = 360,
-    radius = Math.min(width, height) / 2;
-
-    console.log("width:", width, "height:", height);
-
+    var width = 360, height = 360, radius = Math.min(width, height) / 2;
     var color = d3.scaleOrdinal()
         .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
 
     var arc = d3.arc()
-        .outerRadius(radius - 30)
-        .innerRadius(8);
+        .outerRadius(radius - 60)
+        .innerRadius(12);
 
     var pie = d3.pie()
         .sort(null)
@@ -192,41 +187,33 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
         .enter().append("g")
         .attr("class", "arc");
 
-        var labelArc = d3.arc()
-        .outerRadius(radius + 6)
-        .innerRadius(radius + 6);
+    var labelArc = d3.arc()
+    .outerRadius(radius - 48)
+    .innerRadius(radius);
 
-        g.append("path")
-            .attr("d", arc)
-            .style("fill", function(d) { return color(d.data.asset); })
-            .on("mouseover", function(d) {
-            var dist = 10;
-            d3.select(this).attr("transform", "translate(" + arc.centroid(d).map(function(d) { return d/dist; }) + ")");
-            })
-            .on("mouseout", function() {
-                d3.select(this).attr("transform", "translate(0,0)");
-            });
-            
+    g.append("path")
+        .attr("d", arc)
+        .style("fill", function(d) { return color(d.data.asset); })
+        .on("mouseover", function(d) {
+        var dist = 10;
+        d3.select(this).attr("transform", "translate(" + arc.centroid(d).map(function(d) { return d/dist; }) + ")");
+        })
+        .on("mouseout", function() {
+            d3.select(this).attr("transform", "translate(0,0)");
+        });
         
+    
 
-        g.append("text")
-            .attr("transform", function(d) { return "translate(" + labelArc.centroid(d)[0] + ")"; })
-            .attr("dy", ".2em")
-            .style("text-anchor", "middle")
-            .text(function(d) { return d.data.asset; });
+    g.append("text")
+        .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
+        .attr("dy", ".1em")
+        .style("text-anchor", "middle")
+        .text(function(d) { return d.data.asset; });
 
-        g.append("line")
-            .attr("stroke", "black")
-            .attr("x1", function(d) { return arc.centroid(d)[0]; })
-            .attr("y1", function(d) { return arc.centroid(d)[1]; })
-            .attr("x2", function(d) { return labelArc.centroid(d)[0]; })
-            .attr("y2", function(d) { return labelArc.centroid(d)[1]; });
-})
-
-var elements = document.querySelectorAll('svg')
-
-anime({
-    targets: elements,
-    translateX: [270, 320, 0]
-
+    g.append("line")
+        .attr("stroke", "black")
+        .attr("x1", function(d) { return arc.centroid(d)[0]; })
+        .attr("y1", function(d) { return arc.centroid(d)[1]; })
+        .attr("x2", function(d) { return labelArc.centroid(d)[0]; })
+        .attr("y2", function(d) { return labelArc.centroid(d)[1]; });
 })
