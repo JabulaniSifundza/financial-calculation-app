@@ -1,3 +1,6 @@
+google.charts.load('current', {'packages':['corechart', 'line']});
+
+
 document.getElementById("add-ticker-btn").addEventListener("click", ()=>{
     const ticker_inputs = document.getElementById("ticker-inputs")
     const new_ticker = document.createElement("input")
@@ -31,8 +34,9 @@ async function calculate_capm(){
         const ticker_symbols_list = []
         const selected_benchmark = benchmark_selector.options[benchmark_selector.selectedIndex].value
         ticker_symbols.forEach(ticker_symbol => {
-            ticker_symbols_list.push(ticker_symbol.value)
-            const symbol_option = `<option value=${ticker_symbol.value}>${ticker_symbol.value}</option>`
+            const upper = ticker_symbol.value.toUpperCase()
+            ticker_symbols_list.push(upper)
+            const symbol_option = `<option value=${ticker_symbol.value}>${ticker_symbol.value.toUpperCase()}</option>`
             const option_element = document.createElement('option')
             option_element.innerHTML = symbol_option
             select_elem.appendChild(option_element)
@@ -76,7 +80,7 @@ function turner(){
 async function structure_simple_model_data(){
     const simple_model_ticker_selector = document.getElementById("simple-model-ticker-selector")
     const selected_ticker = simple_model_ticker_selector.options[simple_model_ticker_selector.selectedIndex]
-    const symbol = selected_ticker.value
+    const symbol = selected_ticker.value.toUpperCase()
     try{
         const response = await fetch("/api/simple", {
             method: "POST",
@@ -102,7 +106,7 @@ async function structure_simple_model_data(){
 async function get_financial_data(){
     const company_selector = document.getElementById("company-financials-selector")
     const selected_ticker = company_selector.options[company_selector.selectedIndex]
-    const symbol = selected_ticker.value
+    const symbol = selected_ticker.value.toUpperCase()
     try{
         const response = await fetch("/api/company-financials", {
             method: "POST",
@@ -136,84 +140,227 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
     const [fourth_year_cash_flow_sheet, third_year_cash_flow_sheet, second_year_cash_flow_sheet, first_year_cash_flow_sheet] = cash_flow_statements["cashflowStatements"]
     const [fourth_year_income_statement_sheet, third_year_income_statement_sheet, second_year_income_statement_sheet, first_year_income_statement_sheet] = income_statements["incomeStatementHistory"]
 
-    console.log(fourth_year_balance_sheet)
-    console.log(fourth_year_cash_flow_sheet)
+    function get_dates(obj){
+        const [year,] = obj['endDate'].split("T")
+        return year  
+    }
     console.log(fourth_year_income_statement_sheet)
+    //onsole.log(`${year}`)
+    //console.log(typeof year)
+    drawCurrentAssetsPie()
+    drawTotalLiablities()
+    drawAssetsVSLiabilities()
+    drawCashFlowAmountsLines()
+    drawProfitabilityTrend()
+    drawProfitToCostComparison()
+    drawCostBreakdown()
 
-    // Define your pie layout
-    var pie = d3.pie()
-        .value(function(d) { return d.count; });
+    //google.charts.setOnLoadCallback(drawCurrentAssetsPie);
+    function drawCurrentAssetsPie(){
+        var data = new google.visualization.DataTable()
+        data.addColumn('string', 'Current Asset')
+        data.addColumn('number', 'Amount')
+        data.addRows([
+            ['Cash', fourth_year_balance_sheet['cash']],
+            ['Inventory', fourth_year_balance_sheet['inventory']],
+            ['Accounts Receivable', fourth_year_balance_sheet['netReceivables']],
+            ['Short Term Investments', fourth_year_balance_sheet['shortTermInvestments']],
+            ['Other', fourth_year_balance_sheet['otherCurrentAssets']]
+        ])
 
-    // Define your arc generator
-    var arc = d3.arc()
-        .innerRadius(0)
-        .outerRadius(radius);
+        var options = {
+            'title': `${get_dates(fourth_year_balance_sheet)} Current Asset Breakdown`,
+            width: '100%',
+            height: '100%',
+            pieHole: 0.4
+        }
+        var chart = new google.visualization.PieChart(document.getElementById('current-asset-breakdown'))
+        chart.draw(data, options)
+    }
 
-    // Create your SVG container
-    var svg = d3.select("body")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+    function drawTotalLiablities(){
+        var data = new google.visualization.DataTable()
+        data.addColumn('string', 'Liabilities')
+        data.addColumn('number', 'Amount')
+        data.addRows([
+            ['Accounts Payable', fourth_year_balance_sheet['accountsPayable']],
+            ['Long Term Debt', fourth_year_balance_sheet['longTermDebt']],
+            ['Short Term Debt', fourth_year_balance_sheet['shortLongTermDebt']],
+            ['Other Current Liabilities', fourth_year_balance_sheet['otherCurrentLiab']],
+            ['Other', fourth_year_balance_sheet['otherLiab']]
+        ])
 
-    const balance_sheet_data = [
-        {asset: "Cash", amount: fourth_year_balance_sheet["cash"]},
-        {asset: "Inventory", amount: fourth_year_balance_sheet["inventory"]},
-        {asset: "Receivables", amount: fourth_year_balance_sheet["netReceivables"]},
-        {asset: "Other Current Assets", amount: fourth_year_balance_sheet["otherCurrentAssets"]}
-    ]
+        var options = {
+            'title': `${get_dates(fourth_year_balance_sheet)} Total Liability Breakdown`,
+            width: '100%',
+            height: '100%',
+            pieHole: 0.4
+        }
+        var chart = new google.visualization.PieChart(document.getElementById('total-liability-breakdown'))
+        chart.draw(data, options)
+    }
 
-    var width = 360, height = 360, radius = Math.min(width, height) / 2;
-    var color = d3.scaleOrdinal()
-        .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56"]);
 
-    var arc = d3.arc()
-        .outerRadius(radius - 60)
-        .innerRadius(12);
 
-    var pie = d3.pie()
-        .sort(null)
-        .value(function(d) { return d.amount; });
+    function drawAssetsVSLiabilities(){
+        var data = google.visualization.arrayToDataTable([
+            ['Year', 'Current Assets', 'Current Liabilities', 'Total Liabilities', 'Total Assets'],
+            [get_dates(first_year_balance_sheet), first_year_balance_sheet["totalCurrentAssets"], first_year_balance_sheet["totalCurrentLiabilities"], first_year_balance_sheet["totalLiab"], first_year_balance_sheet["totalAssets"]],
+            [get_dates(second_year_balance_sheet), second_year_balance_sheet["totalCurrentAssets"], second_year_balance_sheet["totalCurrentLiabilities"], second_year_balance_sheet["totalLiab"], second_year_balance_sheet["totalAssets"]],
+            [get_dates(third_year_balance_sheet), third_year_balance_sheet["totalCurrentAssets"], third_year_balance_sheet["totalCurrentLiabilities"], third_year_balance_sheet["totalLiab"], third_year_balance_sheet["totalAssets"]],
+            [get_dates(fourth_year_balance_sheet), fourth_year_balance_sheet["totalCurrentAssets"], fourth_year_balance_sheet["totalCurrentLiabilities"], fourth_year_balance_sheet["totalLiab"], fourth_year_balance_sheet["totalAssets"]]
+        ])
 
-    var svg = d3.select("#data-visualizations").append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g")
-        .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
+        var options = {
+            title: `Current Assets, Current Liabilities, Total Liabilities, and Total Assets from ${get_dates(first_year_balance_sheet)} to ${get_dates(fourth_year_balance_sheet)}`,
+            hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+            vAxis: {
+                minValue: 0,
+                format: 'short'
+            },
+            legend: { position: 'bottom' },
+            width: '100%',
+            height: '100%',
+            chartArea:{height:'380'}
+        }
+        var chart = new google.visualization.AreaChart(document.getElementById('asset-liability-comparison'));
+        chart.draw(data, options);
 
-    var g = svg.selectAll(".arc")
-        .data(pie(balance_sheet_data))
-        .enter().append("g")
-        .attr("class", "arc");
+    }
 
-    var labelArc = d3.arc()
-    .outerRadius(radius - 48)
-    .innerRadius(radius);
+    function drawCashFlowAmountsLines(){
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Year');
+        data.addColumn('number', 'Cash Flow From Operations');
+        data.addColumn('number', 'Cash Flow From Investing Activities');
+        data.addColumn('number', 'Cash Flow From Financing Activities');
 
-    g.append("path")
-        .attr("d", arc)
-        .style("fill", function(d) { return color(d.data.asset); })
-        .on("mouseover", function(d) {
-        var dist = 10;
-        d3.select(this).attr("transform", "translate(" + arc.centroid(d).map(function(d) { return d/dist; }) + ")");
-        })
-        .on("mouseout", function() {
-            d3.select(this).attr("transform", "translate(0,0)");
-        });
+        data.addRows([
+            [get_dates(first_year_cash_flow_sheet), first_year_cash_flow_sheet['totalCashFromOperatingActivities'], first_year_cash_flow_sheet['totalCashflowsFromInvestingActivities'], first_year_cash_flow_sheet['totalCashFromFinancingActivities']],
+            [get_dates(second_year_cash_flow_sheet), second_year_cash_flow_sheet['totalCashFromOperatingActivities'], second_year_cash_flow_sheet['totalCashflowsFromInvestingActivities'], second_year_cash_flow_sheet['totalCashFromFinancingActivities']],
+            [get_dates(third_year_cash_flow_sheet), third_year_cash_flow_sheet['totalCashFromOperatingActivities'], third_year_cash_flow_sheet['totalCashflowsFromInvestingActivities'], third_year_cash_flow_sheet['totalCashFromFinancingActivities']],
+            [get_dates(fourth_year_cash_flow_sheet), fourth_year_cash_flow_sheet['totalCashFromOperatingActivities'], fourth_year_cash_flow_sheet['totalCashflowsFromInvestingActivities'], fourth_year_cash_flow_sheet['totalCashFromFinancingActivities']]
+        ])
+
+        var options = {
+            title: `Cash Flows from ${get_dates(first_year_cash_flow_sheet)} to ${get_dates(fourth_year_cash_flow_sheet)}`,
+            curveType: 'function',
+            width: '100%',
+            height: '100%',
+            vAxis:{
+                format: 'short',
+            },
+            hAxis:{
+                gridlines: {color: '#333', minSpacing: 20}
+            },
+            legend: { position: 'bottom' }
+        }
+
+        var chart = new google.visualization.LineChart(document.getElementById('cash-flow-total-line'));
+        chart.draw(data, options);
+    }
+
+    function drawProfitabilityTrend(){
+         var data = google.visualization.arrayToDataTable([
+            ["Year", "EBIT", "Operating Costs"],
+            [get_dates(first_year_income_statement_sheet), first_year_income_statement_sheet["ebit"], first_year_income_statement_sheet["totalOperatingExpenses"]],
+            [get_dates(second_year_income_statement_sheet), second_year_income_statement_sheet["ebit"], second_year_income_statement_sheet["totalOperatingExpenses"]],
+            [get_dates(third_year_income_statement_sheet), third_year_income_statement_sheet["ebit"], third_year_income_statement_sheet["totalOperatingExpenses"]],
+            [get_dates(fourth_year_income_statement_sheet), fourth_year_income_statement_sheet["ebit"], fourth_year_income_statement_sheet["totalOperatingExpenses"]]
+        ])
+        var options = {
+            title: `Operating Costs and EBIT from ${get_dates(first_year_income_statement_sheet)} to ${get_dates(fourth_year_income_statement_sheet)}`,
+            hAxis: {title: 'Year',  titleTextStyle: {color: '#333'}},
+            vAxis: {
+                minValue: 0,
+                format: 'short'
+            },
+            legend: { position: 'bottom' },
+            width: '100%',
+            height: '100%',
+        }
+        var chart = new google.visualization.AreaChart(document.getElementById('income-operatingCost-comparison'));
+        chart.draw(data, options);
+    }
+
+    function drawProfitToCostComparison(){
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Year');
+        data.addColumn('number', 'Net Income');
+        data.addColumn('number', 'Gross Income');
+        data.addColumn('number', 'Operating Expenses');
+        data.addColumn('number', 'Cost of Goods Sold');
+
+        data.addRows([
+            [get_dates(first_year_income_statement_sheet), first_year_income_statement_sheet["netIncome"], first_year_income_statement_sheet["grossProfit"], first_year_income_statement_sheet["totalOperatingExpenses"], first_year_income_statement_sheet["costOfRevenue"]],
+            [get_dates(second_year_income_statement_sheet), second_year_income_statement_sheet["ebit"], second_year_income_statement_sheet["totalOperatingExpenses"], second_year_income_statement_sheet["totalOperatingExpenses"], second_year_income_statement_sheet["costOfRevenue"]],
+            [get_dates(third_year_income_statement_sheet), third_year_income_statement_sheet["ebit"], third_year_income_statement_sheet["totalOperatingExpenses"], third_year_income_statement_sheet["totalOperatingExpenses"], third_year_income_statement_sheet["costOfRevenue"]],
+            [get_dates(fourth_year_income_statement_sheet), fourth_year_income_statement_sheet["ebit"], fourth_year_income_statement_sheet["totalOperatingExpenses"], fourth_year_income_statement_sheet["totalOperatingExpenses"], fourth_year_income_statement_sheet["costOfRevenue"]]
+        ])
+
+        var options = {
+            title: `Net Income, Gross Income, Operating Expenses, and Cost of Goods Sold from ${get_dates(first_year_income_statement_sheet)} to ${get_dates(fourth_year_income_statement_sheet)}`,
+            curveType: 'function',
+            width: '100%',
+            height: '100%',
+            vAxis:{
+                format: 'short',
+            },
+            hAxis:{
+                gridlines: {color: '#333', minSpacing: 20}
+            },
+            legend: { position: 'bottom' }
+        }
+
+        var chart = new google.visualization.LineChart(document.getElementById('profitability-line'));
+        chart.draw(data, options);
+
+    }
+
+    function drawCostBreakdown(){
+        var data = new google.visualization.DataTable()
+        data.addColumn('string', 'Operating Costs')
+        data.addColumn('number', 'Amount')
+        data.addRows([
+            ['R&D', fourth_year_income_statement_sheet['researchDevelopment']],
+            ['Selling, General & Administrative', fourth_year_income_statement_sheet['sellingGeneralAdministrative']],
+            ['Other Operating Expenses', fourth_year_income_statement_sheet['otherOperatingExpenses']]
+        ])
+
+        var options = {
+            'title': `${get_dates(fourth_year_income_statement_sheet)} Operating Cost Breakdown`,
+            width: '100%',
+            height: '100%',
+            is3D: true
+
+        }
+        var chart = new google.visualization.PieChart(document.getElementById('operating-cost-breakdown'))
+        chart.draw(data, options)
         
+    }
+
+    function drawProfitBreakdown(){
+        var data = new google.visualization.DataTable()
+        data.addColumn('string', 'Liabilities')
+        data.addColumn('number', 'Amount')
+        data.addRows([
+            ['Accounts Payable', fourth_year_balance_sheet['accountsPayable']],
+            ['Long Term Debt', fourth_year_balance_sheet['longTermDebt']],
+            ['Short Term Debt', fourth_year_balance_sheet['shortLongTermDebt']],
+            ['Other Current Liabilities', fourth_year_balance_sheet['otherCurrentLiab']],
+            ['Other', fourth_year_balance_sheet['otherLiab']]
+        ])
+
+        var options = {
+            'title': `${get_dates(fourth_year_balance_sheet)} Total Liability Breakdown`,
+            width: '100%',
+            height: '100%',
+            pieHole: 0.4
+        }
+        var chart = new google.visualization.PieChart(document.getElementById(''))
+        chart.draw(data, options)
+
+    }
     
 
-    g.append("text")
-        .attr("transform", function(d) { return "translate(" + labelArc.centroid(d) + ")"; })
-        .attr("dy", ".1em")
-        .style("text-anchor", "middle")
-        .text(function(d) { return d.data.asset; });
-
-    g.append("line")
-        .attr("stroke", "black")
-        .attr("x1", function(d) { return arc.centroid(d)[0]; })
-        .attr("y1", function(d) { return arc.centroid(d)[1]; })
-        .attr("x2", function(d) { return labelArc.centroid(d)[0]; })
-        .attr("y2", function(d) { return labelArc.centroid(d)[1]; });
 })

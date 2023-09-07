@@ -88,86 +88,107 @@ model_global = None
 global_model = None
 
 def simple_predictions(model, inpts):
-    return model.predict(inpts)
+    try:
+        return model.predict(inpts)
+    except Exception as e:
+       print(e)
      
 async def simple_model_data(*args):
-    global global_model
-    model_dataframe = await structure_simple_model_data()
-    global_model = create_simple_model(model_dataframe)
-    return global_model
+    try:
+        global global_model
+        model_dataframe = await structure_simple_model_data()
+        global_model = create_simple_model(model_dataframe)
+        return global_model
+    except Exception as e:
+        print(e)
+       
 
 
 def create_simple_model(model_dataframe):
-    # sourcery skip: inline-immediately-returned-variable, use-assigned-variable
-    df_data = json.loads(model_dataframe)
-    model_DF = pd.DataFrame(df_data['data'])
-    model_DF = model_DF.set_index(['date'])
-    model_DF["Tomorrow"] = model_DF["adjClose"].shift(-1)
-    model_DF["Target"] = (model_DF["Tomorrow"] > model_DF["adjClose"]).astype(int)
-    model = RandomForestClassifier(n_estimators=250, min_samples_split=50, random_state=1)
-    train = model_DF.iloc[:-100]
-    test = model_DF.iloc[-100:]
-    predictors = ["open", "high", "low", "adjClose", "volume"]
-    model.fit(train[predictors], train["Target"])
-    preds = model.predict(test[predictors])
-    preds = pd.Series(preds, index=test.index)
-    # print(precision_score(test["Target"], preds))
-    model_accuracy = precision_score(test["Target"], preds)
-    model_acc_txt = f"Your model is {round((model_accuracy * 100), 2)}% accurate"
-    model_acc_p = js.document.createElement("p")
-    model_acc_p.innerHTML = model_acc_txt
-    model_acc_div = js.document.querySelector('#model-accuracy')
-    model_acc_div.appendChild(model_acc_p)
-    model_global = model
-    add_model_inpts()
-    return model
+    try:
+        # sourcery skip: inline-immediately-returned-variable, use-assigned-variable
+        df_data = json.loads(model_dataframe)
+        model_DF = pd.DataFrame(df_data['data'])
+        model_DF = model_DF.set_index(['date'])
+        model_DF["Tomorrow"] = model_DF["adjClose"].shift(-1)
+        model_DF["Target"] = (model_DF["Tomorrow"] > model_DF["adjClose"]).astype(int)
+        model = RandomForestClassifier(n_estimators=250, min_samples_split=50, random_state=1)
+        train = model_DF.iloc[:-100]
+        test = model_DF.iloc[-100:]
+        predictors = ["open", "high", "low", "adjClose", "volume"]
+        model.fit(train[predictors], train["Target"])
+        preds = model.predict(test[predictors])
+        preds = pd.Series(preds, index=test.index)
+        # print(precision_score(test["Target"], preds))
+        model_accuracy = precision_score(test["Target"], preds)
+        model_acc_txt = f"Your model is {round((model_accuracy * 100), 2)}% accurate"
+        model_acc_p = js.document.createElement("p")
+        model_acc_p.innerHTML = model_acc_txt
+        model_acc_div = js.document.querySelector('#model-accuracy')
+        model_acc_div.appendChild(model_acc_p)
+        model_global = model
+        add_model_inpts()
+        return model
+    except Exception as e:
+       print(e)
     
 
 def add_model_inpts():
-    open_pred = create_model_inpts('Open', 'prediction-open')
-    high_pred = create_model_inpts('High', 'prediction-high')
-    low_pred = create_model_inpts('Low', 'prediction-low')
-    close_pred = create_model_inpts('Close', 'prediction-close')
-    vol_pred = create_model_inpts('Volume', 'prediction-volume')
-    pred_div = js.document.querySelector('#prediction-data')
-    pred_div.appendChild(open_pred)
-    pred_div.appendChild(high_pred)
-    pred_div.appendChild(low_pred)
-    pred_div.appendChild(close_pred)
-    pred_div.appendChild(vol_pred)
-    pred_btn = js.document.querySelector('#make-simple-pred-btn')
-    pred_btn.style.display = "block"
+    try:
+        open_pred = create_model_inpts('Open', 'prediction-open')
+        high_pred = create_model_inpts('High', 'prediction-high')
+        low_pred = create_model_inpts('Low', 'prediction-low')
+        close_pred = create_model_inpts('Close', 'prediction-close')
+        vol_pred = create_model_inpts('Volume', 'prediction-volume')
+        pred_div = js.document.querySelector('#prediction-data')
+        pred_div.appendChild(open_pred)
+        pred_div.appendChild(high_pred)
+        pred_div.appendChild(low_pred)
+        pred_div.appendChild(close_pred)
+        pred_div.appendChild(vol_pred)
+        pred_btn = js.document.querySelector('#make-simple-pred-btn')
+        pred_btn.style.display = "block"
+    except Exception as e:
+        print(e)
 
 # TODO Rename this here and in `create_model_inpts`
 def create_model_inpts(attr, val):
-    result = js.document.createElement("input")
-    result.setAttribute('type', 'number')
-    result.setAttribute('placeholder', attr)
-    result.setAttribute('id', val)
-    return result
+    try:
+        result = js.document.createElement("input")
+        result.setAttribute('type', 'number')
+        result.setAttribute('placeholder', attr)
+        result.setAttribute('id', val)
+        return result
+    except Exception as e:
+        print(e)
     
 def get_prediction_vals():
-    open_value = js.document.getElementById("prediction-open").value
-    high_value = js.document.getElementById("prediction-high").value
-    low_value = js.document.getElementById("prediction-low").value
-    close_value = js.document.getElementById("prediction-close").value
-    volume_value = js.document.getElementById("prediction-volume").value
-    return pd.DataFrame(data=[[open_value, high_value, low_value, close_value, volume_value]], columns=["open", "high", "low", "adjClose", "volume"])
-
+    try:
+        open_value = js.document.getElementById("prediction-open").value
+        high_value = js.document.getElementById("prediction-high").value
+        low_value = js.document.getElementById("prediction-low").value
+        close_value = js.document.getElementById("prediction-close").value
+        volume_value = js.document.getElementById("prediction-volume").value
+        return pd.DataFrame(data=[[open_value, high_value, low_value, close_value, volume_value]], columns=["open", "high", "low", "adjClose", "volume"])
+    except Exception as e:
+        print(e)
 def make_prediction(*args):  # sourcery skip: raise-specific-error
-    global global_model
-    inputs = get_prediction_vals()
-    if global_model is None:
-        raise Exception("Model is not created yet. Please create the model first.")
-    predicted_values = simple_predictions(global_model, inputs)
-    prediction_list = predicted_values.tolist()
-    result = js.document.createElement("p")
-    pred_div = js.document.querySelector('#prediction-verdict')
-    if prediction_list[0] == 1:
-        result.innerHTML = "The model's prediction/recommendation on this security is: Buy."
-    else:
-        result.innerHTML = "The model's prediction/recommendation on this security is: Don't Buy."
-    pred_div.appendChild(result)
+    try:
+        global global_model
+        inputs = get_prediction_vals()
+        if global_model is None:
+            raise Exception("Model is not created yet. Please create the model first.")
+        predicted_values = simple_predictions(global_model, inputs)
+        prediction_list = predicted_values.tolist()
+        result = js.document.createElement("p")
+        pred_div = js.document.querySelector('#prediction-verdict')
+        if prediction_list[0] == 1:
+            result.innerHTML = "The model's prediction/recommendation on this security is: Buy."
+        else:
+            result.innerHTML = "The model's prediction/recommendation on this security is: Don't Buy."
+        pred_div.appendChild(result)
+    except Exception as e:
+        print(e)
 
 
 

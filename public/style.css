@@ -101,3 +101,24 @@ footer{
 .main-container{
     margin-bottom: 300px;
 }
+
+.grid .tick {
+    stroke: lightgrey;
+    opacity: 0.7;
+}
+.grid path {
+    stroke-width: 0;
+}
+
+#data-visualizations{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(auto-fit, 400px);
+    grid-row-gap: 40px;
+}
+
+.ticker-symbol{
+    text-transform: uppercase;
+    
+}
