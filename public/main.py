@@ -1,13 +1,16 @@
 import numpy as np
+import pyscript
 import pandas as pd
 import scipy as sc
+import matplotlib.pyplot as plt
+import scipy.optimize as sco
 from sklearn.model_selection import train_test_split 
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score
 import statsmodels.api as sm
 import json
-from js import calculate_capm, structure_simple_model_data, structure_data, console, document
+from js import calculate_capm, structure_simple_model_data, structure_data, console, document, get_portfolio_data
 from pyodide.ffi.wrappers import add_event_listener
 import pyodide
 # Capm
@@ -84,7 +87,7 @@ async def simple_model_data(*args):
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
 
 """
-model_global = None
+
 global_model = None
 
 def simple_predictions(model, inpts):
@@ -126,7 +129,6 @@ def create_simple_model(model_dataframe):
         model_acc_p.innerHTML = model_acc_txt
         model_acc_div = js.document.querySelector('#model-accuracy')
         model_acc_div.appendChild(model_acc_p)
-        model_global = model
         add_model_inpts()
         return model
     except Exception as e:
@@ -151,7 +153,6 @@ def add_model_inpts():
     except Exception as e:
         print(e)
 
-# TODO Rename this here and in `create_model_inpts`
 def create_model_inpts(attr, val):
     try:
         result = js.document.createElement("input")
@@ -191,9 +192,76 @@ def make_prediction(*args):  # sourcery skip: raise-specific-error
         print(e)
 
 
+# Portfolio Optimization section
+async def portfolio_optimization(*args):
+    # sourcery skip: for-append-to-extend, list-comprehension, remove-zero-from-range
+    try:
+        portfolio_data = await get_portfolio_data()
+        portfolio_dict = json.loads(portfolio_data)
+        company_symbols = list(portfolio_dict.keys())
+        portfolio_asset_count = len(company_symbols)
+        flattened_data = [dict(company = company, **values) for company, company_data in portfolio_dict.items() for values in company_data]
+        # Create a DataFrame from the list of dictionaries
+        portfolio_df = pd.DataFrame(flattened_data)
+        portfolio_df['date'] = pd.to_datetime(portfolio_df['date'])
+        portfolio_df.set_index(['date', 'company'], inplace=True)
+        num_portfolios = 10 ** 5
+        # Random weights
+        np.random.seed(42)
+        asset_weights = np.random.random(size=(num_portfolios, portfolio_asset_count))
+        asset_weights /= np.sum(asset_weights, axis=1)[:, np.newaxis]
+        adjusted_close = pd.DataFrame(portfolio_df['adjClose'])
+        adjusted_close_df = adjusted_close.pivot_table(index='date', columns='company', values='adjClose')
+        portfolio_logarithmic_returns = np.log(adjusted_close_df/adjusted_close_df.shift(1))
+        # Multiply average by 252 which are the trading days in a year
+        average_portfolio_returns = portfolio_logarithmic_returns.mean() * 252
+        # Covariance and correlation matrices
+        covariance_portfolio_returns = portfolio_logarithmic_returns.cov() * 252
+        correlation_portfolio_returns = portfolio_logarithmic_returns.corr() * 252
+        # Expected portfolio return
+        expected_portfolio_return = np.dot(asset_weights, average_portfolio_returns)
+        portfolio_volatility_list = []
+        for i in range(0, len(asset_weights)):
+            portfolio_volatility_list.append(np.sqrt(np.dot(asset_weights[i].T, np.dot(covariance_portfolio_returns, asset_weights[i]))))
+        portfolio_volatility_list = np.array(portfolio_volatility_list)
+        portfolio_sharpe_ratio = expected_portfolio_return / portfolio_volatility_list
+        portfolio_results_df = pd.DataFrame({'returns': expected_portfolio_return, 'volatility': portfolio_volatility_list, 'sharpe_ratio': portfolio_sharpe_ratio})
+        num_points = 100
+        efficient_portfolio_volatility = []
+        indices_to_skip = []
+        efficient_portfolio_returns = np.linspace(portfolio_results_df.returns.min(), portfolio_results_df.returns.max(), num_points)
+        efficient_portfolio_returns = np.round(efficient_portfolio_returns, 2)
+        expected_portfolio_return = np.round(expected_portfolio_return, 2)
+        for point_index in range(num_points):
+            if efficient_portfolio_returns[point_index] not in expected_portfolio_return:
+                indices_to_skip.append(point_index)
+                continue
+            matched_index = np.where(expected_portfolio_return == efficient_portfolio_returns[point_index])
+            efficient_portfolio_volatility.append(np.min(portfolio_volatility_list[matched_index]))
+        efficient_portfolio_returns = np.delete(efficient_portfolio_returns, indices_to_skip)
+        MARKS = ['o', 'X', 'd', '*']
+        fig, ax = plt.subplots()
+        portfolio_results_df.plot(kind='scatter', x='volatility', y='returns', c='sharpe_ratio', cmap='RdYlGn', edgecolors='black', ax=ax)
+        ax.set(xlabel='Volatility', ylabel='Expected Returns', title='Efficient Frontier')
+        for asset_index in range(portfolio_asset_count):
+            ax.scatter(x=np.sqrt(covariance_portfolio_returns.iloc[asset_index, asset_index]),
+                       y=average_portfolio_returns[asset_index],
+                       marker=MARKS[asset_index],
+                       s=150,
+                       color='black',
+                       label=company_symbols[asset_index])
+        ax.legend()
+        pyscript.display(plt, target="chartContainer")
+    except Exception as e:
+        print(e)
+
+
+
+
 
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)
 add_event_listener(document.getElementById("make-simple-pred-btn"), "click", make_prediction)
+add_event_listener(document.getElementById("get-current-portfolio"), "click", portfolio_optimization)
 

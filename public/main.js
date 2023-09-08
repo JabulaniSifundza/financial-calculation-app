@@ -128,6 +128,28 @@ async function get_financial_data(){
     }
 }
 
+async function get_portfolio_data(){
+    try{
+        const response = await fetch("/api/portfolio-data", {
+            method: "POST",
+            headers:{
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                portfolio_name: "My Portfolio"
+            })
+        })
+        const data = await response.json()
+        const portfolio_data = JSON.stringify(data.data)
+        //console.log(portfolio_data)
+        return portfolio_data
+
+    } catch(error){
+        console.log(error)
+        alert(`Unfortunately the following error has occurred: ${error}`);
+    }
+}
+
 document.getElementById("get-company-financial-data").addEventListener("click", async()=>{
     const data = await get_financial_data()
     // Destructure financial document array
@@ -413,8 +435,6 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
         chart.draw(data, options)
 
     }
-
-
     // Summary Financials
     const summarize_financials = ()=>{
         const inner = `
