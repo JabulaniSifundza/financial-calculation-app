@@ -130,23 +130,22 @@ async function get_financial_data(){
 
 document.getElementById("get-company-financial-data").addEventListener("click", async()=>{
     const data = await get_financial_data()
-    //console.log(data['data'])
     // Destructure financial document array
     const [balance_sheets, cash_flow_statements, income_statements, current_financial_data] = data['data']
-    //console.log(current_financial_data)
 
     // Destructure balance sheet array
     const [fourth_year_balance_sheet, third_year_balance_sheet, second_year_balance_sheet, first_year_balance_sheet] = balance_sheets["balanceSheetStatements"]
     const [fourth_year_cash_flow_sheet, third_year_cash_flow_sheet, second_year_cash_flow_sheet, first_year_cash_flow_sheet] = cash_flow_statements["cashflowStatements"]
     const [fourth_year_income_statement_sheet, third_year_income_statement_sheet, second_year_income_statement_sheet, first_year_income_statement_sheet] = income_statements["incomeStatementHistory"]
 
+    // Helper function to get dates
     function get_dates(obj){
         const [year,] = obj['endDate'].split("T")
         return year  
     }
-    console.log(fourth_year_income_statement_sheet)
-    //onsole.log(`${year}`)
-    //console.log(typeof year)
+    console.log(current_financial_data)
+
+    // Calling functions for visualizations and summary
     drawCurrentAssetsPie()
     drawTotalLiablities()
     drawAssetsVSLiabilities()
@@ -154,8 +153,9 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
     drawProfitabilityTrend()
     drawProfitToCostComparison()
     drawCostBreakdown()
+    drawProfitBreakdown()
 
-    //google.charts.setOnLoadCallback(drawCurrentAssetsPie);
+    // Chart functions
     function drawCurrentAssetsPie(){
         var data = new google.visualization.DataTable()
         data.addColumn('string', 'Current Asset')
@@ -172,7 +172,13 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             'title': `${get_dates(fourth_year_balance_sheet)} Current Asset Breakdown`,
             width: '100%',
             height: '100%',
-            pieHole: 0.4
+            pieHole: 0.4,
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
         var chart = new google.visualization.PieChart(document.getElementById('current-asset-breakdown'))
         chart.draw(data, options)
@@ -194,7 +200,13 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             'title': `${get_dates(fourth_year_balance_sheet)} Total Liability Breakdown`,
             width: '100%',
             height: '100%',
-            pieHole: 0.4
+            pieHole: 0.4,
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
         var chart = new google.visualization.PieChart(document.getElementById('total-liability-breakdown'))
         chart.draw(data, options)
@@ -221,9 +233,17 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             legend: { position: 'bottom' },
             width: '100%',
             height: '100%',
-            chartArea:{height:'380'}
+            chartArea:{height:'380'},
+            seriesType: 'bars',
+            series: {0: {type: 'line'}},
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
-        var chart = new google.visualization.AreaChart(document.getElementById('asset-liability-comparison'));
+        var chart = new google.visualization.ComboChart(document.getElementById('asset-liability-comparison'));
         chart.draw(data, options);
 
     }
@@ -247,16 +267,24 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             curveType: 'function',
             width: '100%',
             height: '100%',
+            seriesType: 'bars',
+            series: {0: {type: 'line'}},
             vAxis:{
                 format: 'short',
             },
             hAxis:{
                 gridlines: {color: '#333', minSpacing: 20}
             },
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom' },
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
 
-        var chart = new google.visualization.LineChart(document.getElementById('cash-flow-total-line'));
+        var chart = new google.visualization.ComboChart(document.getElementById('cash-flow-total-line'));
         chart.draw(data, options);
     }
 
@@ -278,6 +306,12 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             legend: { position: 'bottom' },
             width: '100%',
             height: '100%',
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
         var chart = new google.visualization.AreaChart(document.getElementById('income-operatingCost-comparison'));
         chart.draw(data, options);
@@ -293,9 +327,9 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
 
         data.addRows([
             [get_dates(first_year_income_statement_sheet), first_year_income_statement_sheet["netIncome"], first_year_income_statement_sheet["grossProfit"], first_year_income_statement_sheet["totalOperatingExpenses"], first_year_income_statement_sheet["costOfRevenue"]],
-            [get_dates(second_year_income_statement_sheet), second_year_income_statement_sheet["ebit"], second_year_income_statement_sheet["totalOperatingExpenses"], second_year_income_statement_sheet["totalOperatingExpenses"], second_year_income_statement_sheet["costOfRevenue"]],
-            [get_dates(third_year_income_statement_sheet), third_year_income_statement_sheet["ebit"], third_year_income_statement_sheet["totalOperatingExpenses"], third_year_income_statement_sheet["totalOperatingExpenses"], third_year_income_statement_sheet["costOfRevenue"]],
-            [get_dates(fourth_year_income_statement_sheet), fourth_year_income_statement_sheet["ebit"], fourth_year_income_statement_sheet["totalOperatingExpenses"], fourth_year_income_statement_sheet["totalOperatingExpenses"], fourth_year_income_statement_sheet["costOfRevenue"]]
+            [get_dates(second_year_income_statement_sheet), second_year_income_statement_sheet["netIncome"], second_year_income_statement_sheet["grossProfit"], second_year_income_statement_sheet["totalOperatingExpenses"], second_year_income_statement_sheet["costOfRevenue"]],
+            [get_dates(third_year_income_statement_sheet), third_year_income_statement_sheet["netIncome"], third_year_income_statement_sheet["grossProfit"], third_year_income_statement_sheet["totalOperatingExpenses"], third_year_income_statement_sheet["costOfRevenue"]],
+            [get_dates(fourth_year_income_statement_sheet), fourth_year_income_statement_sheet["netIncome"], fourth_year_income_statement_sheet["grossProfit"], fourth_year_income_statement_sheet["totalOperatingExpenses"], fourth_year_income_statement_sheet["costOfRevenue"]]
         ])
 
         var options = {
@@ -303,16 +337,24 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             curveType: 'function',
             width: '100%',
             height: '100%',
+            seriesType: 'bars',
+            series: {0: {type: 'line'}},
             vAxis:{
                 format: 'short',
             },
             hAxis:{
                 gridlines: {color: '#333', minSpacing: 20}
             },
-            legend: { position: 'bottom' }
+            legend: { position: 'bottom' },
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
 
-        var chart = new google.visualization.LineChart(document.getElementById('profitability-line'));
+        var chart = new google.visualization.ComboChart(document.getElementById('profitability-line'));
         chart.draw(data, options);
 
     }
@@ -331,7 +373,13 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
             'title': `${get_dates(fourth_year_income_statement_sheet)} Operating Cost Breakdown`,
             width: '100%',
             height: '100%',
-            is3D: true
+            pieHole: 0.4,
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
 
         }
         var chart = new google.visualization.PieChart(document.getElementById('operating-cost-breakdown'))
@@ -341,26 +389,36 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
 
     function drawProfitBreakdown(){
         var data = new google.visualization.DataTable()
-        data.addColumn('string', 'Liabilities')
+        data.addColumn('string', 'Income')
         data.addColumn('number', 'Amount')
         data.addRows([
-            ['Accounts Payable', fourth_year_balance_sheet['accountsPayable']],
-            ['Long Term Debt', fourth_year_balance_sheet['longTermDebt']],
-            ['Short Term Debt', fourth_year_balance_sheet['shortLongTermDebt']],
-            ['Other Current Liabilities', fourth_year_balance_sheet['otherCurrentLiab']],
-            ['Other', fourth_year_balance_sheet['otherLiab']]
+            ['Net Income', fourth_year_income_statement_sheet['netIncome']],
+            ['Gross Profit', fourth_year_income_statement_sheet['grossProfit']],
+            ['Operating Income', fourth_year_income_statement_sheet['ebit']],
         ])
 
         var options = {
-            'title': `${get_dates(fourth_year_balance_sheet)} Total Liability Breakdown`,
+        'title': `${get_dates(fourth_year_balance_sheet)} Income Breakdown`,
             width: '100%',
             height: '100%',
-            pieHole: 0.4
+            pieHole: 0.4,
+            colors: ["#004083", "#AC0202", "#107E7D", "#F7B801", "#6CC551"],
+            animation:{
+                "startup": true,
+                duration: 1500,
+                easing: 'out',
+            }
         }
-        var chart = new google.visualization.PieChart(document.getElementById(''))
+        var chart = new google.visualization.PieChart(document.getElementById('revenue-breakdown'))
         chart.draw(data, options)
 
     }
-    
 
+
+    // Summary Financials
+    const summarize_financials = ()=>{
+        const inner = `
+            <h3></h3>
+        `
+    }
 })
