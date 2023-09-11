@@ -197,6 +197,7 @@ async def portfolio_optimization(*args):
     # sourcery skip: for-append-to-extend, list-comprehension, remove-zero-from-range
     try:
         portfolio_data = await get_portfolio_data()
+        # print(portfolio_data)
         portfolio_dict = json.loads(portfolio_data)
         company_symbols = list(portfolio_dict.keys())
         portfolio_asset_count = len(company_symbols)
@@ -219,6 +220,7 @@ async def portfolio_optimization(*args):
         covariance_portfolio_returns = portfolio_logarithmic_returns.cov() * 252
         correlation_portfolio_returns = portfolio_logarithmic_returns.corr() * 252
         # Expected portfolio return
+        # Using Monte Carlo simulations to find efficient frontier
         expected_portfolio_return = np.dot(asset_weights, average_portfolio_returns)
         portfolio_volatility_list = []
         for i in range(0, len(asset_weights)):
@@ -226,12 +228,13 @@ async def portfolio_optimization(*args):
         portfolio_volatility_list = np.array(portfolio_volatility_list)
         portfolio_sharpe_ratio = expected_portfolio_return / portfolio_volatility_list
         portfolio_results_df = pd.DataFrame({'returns': expected_portfolio_return, 'volatility': portfolio_volatility_list, 'sharpe_ratio': portfolio_sharpe_ratio})
-        num_points = 100
+        num_points = 500
         efficient_portfolio_volatility = []
         indices_to_skip = []
         efficient_portfolio_returns = np.linspace(portfolio_results_df.returns.min(), portfolio_results_df.returns.max(), num_points)
         efficient_portfolio_returns = np.round(efficient_portfolio_returns, 2)
         expected_portfolio_return = np.round(expected_portfolio_return, 2)
+        # print(expected_portfolio_return)
         for point_index in range(num_points):
             if efficient_portfolio_returns[point_index] not in expected_portfolio_return:
                 indices_to_skip.append(point_index)
@@ -239,26 +242,83 @@ async def portfolio_optimization(*args):
             matched_index = np.where(expected_portfolio_return == efficient_portfolio_returns[point_index])
             efficient_portfolio_volatility.append(np.min(portfolio_volatility_list[matched_index]))
         efficient_portfolio_returns = np.delete(efficient_portfolio_returns, indices_to_skip)
-        MARKS = ['o', 'X', 'd', '*']
+        MARKS = ['o', 'v', '^', '<', '>', 's', 'p', '*', 'h', 'H', '+', 'x', 'D', 'd', '|', '_', '.', ',', '1', '3', '2', '4', 5, 6, 7, 8, 9, 10, 'P']
         fig, ax = plt.subplots()
         portfolio_results_df.plot(kind='scatter', x='volatility', y='returns', c='sharpe_ratio', cmap='RdYlGn', edgecolors='black', ax=ax)
         ax.set(xlabel='Volatility', ylabel='Expected Returns', title='Efficient Frontier')
         for asset_index in range(portfolio_asset_count):
             ax.scatter(x=np.sqrt(covariance_portfolio_returns.iloc[asset_index, asset_index]),
                        y=average_portfolio_returns[asset_index],
-                       marker=MARKS[asset_index],
                        s=150,
+                       marker=MARKS[asset_index % len(MARKS)], 
                        color='black',
                        label=company_symbols[asset_index])
         ax.legend()
         pyscript.display(plt, target="chartContainer")
+        # print(portfolio_results_df)
+        # Calculating the Tangency portfolio - Has the highest Sharpe Ratio/ Maximum expected return per unit of risk
+        max_sharpe_ratio_idx = np.argmax(portfolio_results_df.sharpe_ratio)
+        max_sharpe_ratio_port = portfolio_results_df.loc[max_sharpe_ratio_idx]
+        min_volatility_idx = np.argmin(portfolio_results_df.volatility)
+        min_volatility_port = portfolio_results_df.loc[ min_volatility_idx]
+        # Maximum sharpe ratio portfolio
+        portfolio_1_div = js.document.querySelector('#portfolio-breakdown-1')
+        for idx, val in max_sharpe_ratio_port.items():
+            print(f"{idx}: {100 * val: .2f}%")
+            portfolio_stats = js.document.createElement("p")
+            portfolio_stats.innerHTML = f"{idx}: {100 * val: .2f}%"
+            portfolio_1_div.appendChild(portfolio_stats)
+        for x, y in zip(company_symbols, asset_weights[np.argmax(portfolio_results_df.sharpe_ratio)]):
+            print(f'{x}: {100 * y: .2f}%')
+            portfolio_weights = js.document.createElement("p")
+            portfolio_weights.innerHTML = f"{x}: {100 * y: .2f}%"
+            portfolio_1_div.appendChild(portfolio_weights)
+        # Minimum Volatitlity Portfolio
+        for idx, val in min_volatility_port.items():
+            print(f"{idx}: {100 * val: .2f}%")
+            min_volatility_portfolio_stats = js.document.createElement("p")
+            min_volatility_portfolio_stats.innerHTML = f"{idx}: {100 * val: .2f}%"
+            portfolio_1_div.appendChild(min_volatility_portfolio_stats)
+        for x, y in zip(company_symbols, asset_weights[np.argmin(portfolio_results_df.volatility)]):
+            print(f'{x}: {100 * y: .2f}%')
+            min_volatility_portfolio_weights = js.document.createElement("p")
+            min_volatility_portfolio_weights.innerHTML = f"{x}: {100 * y: .2f}%"
+            portfolio_1_div.appendChild(min_volatility_portfolio_weights)
+        figure, axis = plt.subplots()
+        portfolio_results_df.plot(kind='scatter', x='volatility', y='returns', c='sharpe_ratio', cmap='RdYlGn', edgecolors='black', ax=axis)
+        axis.scatter(x=max_sharpe_ratio_port.volatility, y=max_sharpe_ratio_port.returns, c='black', marker='*', s=200, label='Maximum Sharpe Ratio')
+        axis.scatter(x=min_volatility_port.volatility, y=min_volatility_port.returns, c='black', marker='P', s=200, label='Minimum Volatility')
+        axis.set(xlabel='Volatility', ylabel='Expected Returns', title='Efficient Frontier')
+        axis.legend()
+        pyscript.display(plt, target="chart2Container")
+        
+        # Efficient Frontier using Optimization
+        
     except Exception as e:
         print(e)
+        
+def get_portfolio_rtn(weight, avg_rtns):
+    return np.sum(avg_rtns * weight)
 
+def get_portfolio_volatility(weight, avg_rtns, covariance_matrix):
+    return np.sqrt(np.dot(weight.T, np.dot(covariance_matrix, weight)))
 
+def get_frontier(avg_rtns, covariance_matrix, rtns_range):
+    efficient_portfolios = []
+    n_assets = len(avg_rtns)
+    args = (avg_rtns, covariance_matrix)
+    bounds = tuple((0, 1) for _ in range(n_assets))
+    initial_guess = n_assets * [1. / n_assets]
+    for retrn in rtns_range:
+        constraints = ({'type': 'eq', 'fun': lambda x: get_portfolio_rtn(x, avg_rtns) - retrn}, {'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+        efficient_portfolio = sco.minimize(get_portfolio_volatility, initial_guess, args=args, method='SLSQP', constraints=constraints, bounds=bounds)
+        efficient_portfolios.append(efficient_portfolio)
+    return efficient_portfolios
 
-
-
+rtns_range = np.linspace(-0.22, 0.32, 200)
+efficient_ports = get_frontier(avg_rtns, cov_matrix, rtns_range)
+volatility_range = [x['fun'] for x in efficient_ports]
+# Continue here
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)
