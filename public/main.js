@@ -63,6 +63,7 @@ async function calculate_capm(){
         const risk_free_rate = JSON.stringify(risk_free_data)
         const beta_data = JSON.stringify(company_beta_values)
         create_symbol_selector("company-financials-selector", "ticker-symbol")
+        create_symbol_selector("monte-carlo-sim-selector", "ticker-symbol")
         //console.log(beta_data)
         return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
     }
@@ -442,3 +443,30 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
         `
     }
 })
+
+
+
+async function get_monte_symbol_data(){
+    const company_selector = document.getElementById("monte-carlo-sim-selector")
+    const selected_ticker = company_selector.options[company_selector.selectedIndex]
+    const symbol = selected_ticker.value.toUpperCase()
+    try{
+        const response = await fetch("/api/monte-carlo", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker_symbol: symbol
+            })
+        })
+        const data = await response.json()
+        const financial_data = JSON.stringify(data)
+        //console.log(financial_data)
+        return financial_data
+    }
+    catch(error){
+        console.log(error)
+        alert(`Unfortunately the following error has occurred: ${error}`);
+    }
+}

@@ -1,18 +1,13 @@
 import numpy as np
 import pyscript
 import pandas as pd
-import scipy as sc
 import matplotlib.pyplot as plt
 import scipy.optimize as sco
-from sklearn.model_selection import train_test_split 
-from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score
-import statsmodels.api as sm
 import json
-from js import calculate_capm, structure_simple_model_data, structure_data, console, document, get_portfolio_data
+from js import structure_simple_model_data, structure_data, document, get_portfolio_data, get_monte_symbol_data
 from pyodide.ffi.wrappers import add_event_listener
-import pyodide
 # Capm
 # The Formula for CAPM: Expected Return = (Beta * (Return of the Market - Risk Free Rate)) + Risk free rate
 """
@@ -24,10 +19,14 @@ import pyodide
 - Beta = 1: The asset and the market are moving in the same direction by the same amount
 - Beta > 1: The asset moves in the same direction as the market but in greater amount
 """
+global_model = None
+risk_free_global = None
+
 
 async def company_data(*args):
     data = await structure_data()
     # console.log(data)
+    global risk_free_global
     [companies, benchmark, risk_free, beta_data] = data
     companies = json.loads(companies)
     benchmark = json.loads(benchmark)
@@ -35,10 +34,10 @@ async def company_data(*args):
     beta_values = json.loads(beta_data)
     company_tickers = list(companies.keys())
     benchmark_ticker = list(benchmark.keys())
-    
     benchmark_symbol = benchmark_ticker[0]
     avg_return_arr = []
     market_return_arr = []
+    risk_free_global = risk_free_rate[0]['close']
     for symbol in company_tickers:
         # print(companies[symbol])
         stock_price_data = companies[symbol]
@@ -61,11 +60,7 @@ async def company_data(*args):
                 new_p.innerHTML = f"Ticker symbol: {obj_key} <br> Average rate of return(annual): {round(obj_val * 100, 2)}% <br> Stock beta: {round(beta_values[obj_key], 2)} <br> CAPM: {round(float((beta_values[obj_key]) * ((float(market_return_arr[0][benchmark_symbol]) * 100)) - risk_free_rate[0]['close']) + risk_free_rate[0]['close'], 2)}%"
                 div_to_insert = js.document.querySelector('#div-to-insert')
                 div_to_insert.appendChild(new_p)
-                
-                
-                
-"""
-Linear Regression
+"""Linear Regression
 - Predicting Stock Prices using a linear regression model
 - Features: Volume and Open
 
@@ -81,21 +76,19 @@ async def simple_model_data(*args):
     regressor = LinearRegression()
     regressor.fit(X_train, Y_train)
     y_pred = regressor.predict(X_test)
-    
     print('Mean Absolute Error:', metrics.mean_absolute_error(Y_test, y_pred))  
     print('Mean Squared Error:', metrics.mean_squared_error(Y_test, y_pred))  
     print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(Y_test, y_pred)))
-
 """
 
-global_model = None
 
 def simple_predictions(model, inpts):
     try:
         return model.predict(inpts)
     except Exception as e:
-       print(e)
-     
+        print(e)
+        
+
 async def simple_model_data(*args):
     try:
         global global_model
@@ -104,7 +97,6 @@ async def simple_model_data(*args):
         return global_model
     except Exception as e:
         print(e)
-       
 
 
 def create_simple_model(model_dataframe):
@@ -133,7 +125,7 @@ def create_simple_model(model_dataframe):
         return model
     except Exception as e:
        print(e)
-    
+
 
 def add_model_inpts():
     try:
@@ -153,6 +145,7 @@ def add_model_inpts():
     except Exception as e:
         print(e)
 
+
 def create_model_inpts(attr, val):
     try:
         result = js.document.createElement("input")
@@ -162,7 +155,8 @@ def create_model_inpts(attr, val):
         return result
     except Exception as e:
         print(e)
-    
+
+
 def get_prediction_vals():
     try:
         open_value = js.document.getElementById("prediction-open").value
@@ -173,6 +167,8 @@ def get_prediction_vals():
         return pd.DataFrame(data=[[open_value, high_value, low_value, close_value, volume_value]], columns=["open", "high", "low", "adjClose", "volume"])
     except Exception as e:
         print(e)
+        
+        
 def make_prediction(*args):  # sourcery skip: raise-specific-error
     try:
         global global_model
@@ -194,14 +190,14 @@ def make_prediction(*args):  # sourcery skip: raise-specific-error
 
 # Portfolio Optimization section
 async def portfolio_optimization(*args):
-    # sourcery skip: for-append-to-extend, list-comprehension, remove-zero-from-range
+    # sourcery skip: for-append-to-extend, list-comprehension, low-code-quality, remove-zero-from-range
     try:
         portfolio_data = await get_portfolio_data()
         # print(portfolio_data)
         portfolio_dict = json.loads(portfolio_data)
         company_symbols = list(portfolio_dict.keys())
         portfolio_asset_count = len(company_symbols)
-        flattened_data = [dict(company = company, **values) for company, company_data in portfolio_dict.items() for values in company_data]
+        flattened_data = [dict(company=company, **values) for company, company_data in portfolio_dict.items() for values in company_data]
         # Create a DataFrame from the list of dictionaries
         portfolio_df = pd.DataFrame(flattened_data)
         portfolio_df['date'] = pd.to_datetime(portfolio_df['date'])
@@ -213,7 +209,7 @@ async def portfolio_optimization(*args):
         asset_weights /= np.sum(asset_weights, axis=1)[:, np.newaxis]
         adjusted_close = pd.DataFrame(portfolio_df['adjClose'])
         adjusted_close_df = adjusted_close.pivot_table(index='date', columns='company', values='adjClose')
-        portfolio_logarithmic_returns = np.log(adjusted_close_df/adjusted_close_df.shift(1))
+        portfolio_logarithmic_returns = np.log(adjusted_close_df / adjusted_close_df.shift(1))
         # Multiply average by 252 which are the trading days in a year
         average_portfolio_returns = portfolio_logarithmic_returns.mean() * 252
         # Covariance and correlation matrices
@@ -250,7 +246,7 @@ async def portfolio_optimization(*args):
             ax.scatter(x=np.sqrt(covariance_portfolio_returns.iloc[asset_index, asset_index]),
                        y=average_portfolio_returns[asset_index],
                        s=150,
-                       marker=MARKS[asset_index % len(MARKS)], 
+                       marker=MARKS[asset_index % len(MARKS)],
                        color='black',
                        label=company_symbols[asset_index])
         ax.legend()
@@ -260,27 +256,24 @@ async def portfolio_optimization(*args):
         max_sharpe_ratio_idx = np.argmax(portfolio_results_df.sharpe_ratio)
         max_sharpe_ratio_port = portfolio_results_df.loc[max_sharpe_ratio_idx]
         min_volatility_idx = np.argmin(portfolio_results_df.volatility)
-        min_volatility_port = portfolio_results_df.loc[ min_volatility_idx]
+        min_volatility_port = portfolio_results_df.loc[min_volatility_idx]
         # Maximum sharpe ratio portfolio
         portfolio_1_div = js.document.querySelector('#portfolio-breakdown-1')
+        portfolio_3_div = js.document.querySelector('#portfolio-breakdown-3')
         for idx, val in max_sharpe_ratio_port.items():
-            print(f"{idx}: {100 * val: .2f}%")
             portfolio_stats = js.document.createElement("p")
             portfolio_stats.innerHTML = f"{idx}: {100 * val: .2f}%"
             portfolio_1_div.appendChild(portfolio_stats)
         for x, y in zip(company_symbols, asset_weights[np.argmax(portfolio_results_df.sharpe_ratio)]):
-            print(f'{x}: {100 * y: .2f}%')
             portfolio_weights = js.document.createElement("p")
             portfolio_weights.innerHTML = f"{x}: {100 * y: .2f}%"
             portfolio_1_div.appendChild(portfolio_weights)
         # Minimum Volatitlity Portfolio
         for idx, val in min_volatility_port.items():
-            print(f"{idx}: {100 * val: .2f}%")
             min_volatility_portfolio_stats = js.document.createElement("p")
             min_volatility_portfolio_stats.innerHTML = f"{idx}: {100 * val: .2f}%"
             portfolio_1_div.appendChild(min_volatility_portfolio_stats)
         for x, y in zip(company_symbols, asset_weights[np.argmin(portfolio_results_df.volatility)]):
-            print(f'{x}: {100 * y: .2f}%')
             min_volatility_portfolio_weights = js.document.createElement("p")
             min_volatility_portfolio_weights.innerHTML = f"{x}: {100 * y: .2f}%"
             portfolio_1_div.appendChild(min_volatility_portfolio_weights)
@@ -291,17 +284,55 @@ async def portfolio_optimization(*args):
         axis.set(xlabel='Volatility', ylabel='Expected Returns', title='Efficient Frontier')
         axis.legend()
         pyscript.display(plt, target="chart2Container")
-        
         # Efficient Frontier using Optimization
-        
+        rtns_range = np.linspace(-0.22, 0.32, 200)
+        efficient_ports = get_frontier(average_portfolio_returns, covariance_portfolio_returns, rtns_range)
+        volatility_range = [x['fun'] for x in efficient_ports]
+        chart, axes = plt.subplots()
+        portfolio_results_df.plot(kind='scatter', x='volatility', y='returns', c='sharpe_ratio', cmap='RdYlGn', edgecolors='black', ax=axes)
+        axes.plot(volatility_range, rtns_range, 'b--', linewidth=3)
+        axes.set(xlabel='Volatility', ylabel='Expected Returns', title='Efficient Frontier')
+        pyscript.display(plt, target="chart3Container")
+        optimized_min_volatility = np.argmin(volatility_range)
+        optimized_min_port_return = rtns_range[optimized_min_volatility]
+        optimized_min_port_vol = efficient_ports[optimized_min_volatility]['fun']
+        min_optimized_port_vol = {'Return': optimized_min_port_return, 'Volatility': optimized_min_port_vol, 'Sharpe Ratio': (optimized_min_port_return / optimized_min_port_vol)}
+        for index, value in min_optimized_port_vol.items():
+            optimized_port_stats = js.document.createElement("p")
+            optimized_port_stats.innerHTML = f"{index}: {100 * value: .2f}%"
+            portfolio_3_div.appendChild(optimized_port_stats)
+        for x, y in zip(company_symbols, efficient_ports[optimized_min_volatility]['x']):
+            optimized_port_weights = js.document.createElement("p")
+            optimized_port_weights.innerHTML = f"{x}: {100 * y:.2f}%"
+            portfolio_3_div.appendChild(optimized_port_weights)
+        # Finding the Tnagency Portfolio
+        number_of_assets = len(average_portfolio_returns)
+        new_args = (average_portfolio_returns, covariance_portfolio_returns, risk_free_global)
+        new_constraints = ({'type': 'eq', 'fun': lambda x: np.sum(x) - 1})
+        new_bounds = tuple((0, 1) for _ in range(number_of_assets))
+        initial_value = number_of_assets * [1. / number_of_assets]
+        maximum_sharpe = sco.minimize(negative_sharpe_ratio, x0=initial_value, args=new_args, method='SLSQP', bounds=new_bounds, constraints=new_constraints)
+        new_maximum_sharpe_weights = maximum_sharpe['x']
+        maximum_sharpe_port = {'Return': get_portfolio_rtn(new_maximum_sharpe_weights, average_portfolio_returns), 'Volatility': get_portfolio_volatility(new_maximum_sharpe_weights, average_portfolio_returns, covariance_portfolio_returns), 'Sharpe Ratio': -maximum_sharpe['fun']}
+        for i, j in maximum_sharpe_port.items():
+            optimized_port_stats = js.document.createElement("p")
+            optimized_port_stats.innerHTML = f"{i}: {100 * j: .2f}%"
+            portfolio_3_div.appendChild(optimized_port_stats)
+        for x, y in zip(company_symbols, new_maximum_sharpe_weights):
+            optimized_port_weights = js.document.createElement("p")
+            optimized_port_weights.innerHTML = f"{x}: {100 * y:.2f}%"
+            portfolio_3_div.appendChild(optimized_port_weights)
     except Exception as e:
         print(e)
-        
+
+
 def get_portfolio_rtn(weight, avg_rtns):
     return np.sum(avg_rtns * weight)
 
+
 def get_portfolio_volatility(weight, avg_rtns, covariance_matrix):
     return np.sqrt(np.dot(weight.T, np.dot(covariance_matrix, weight)))
+
 
 def get_frontier(avg_rtns, covariance_matrix, rtns_range):
     efficient_portfolios = []
@@ -315,13 +346,51 @@ def get_frontier(avg_rtns, covariance_matrix, rtns_range):
         efficient_portfolios.append(efficient_portfolio)
     return efficient_portfolios
 
-rtns_range = np.linspace(-0.22, 0.32, 200)
-efficient_ports = get_frontier(avg_rtns, cov_matrix, rtns_range)
-volatility_range = [x['fun'] for x in efficient_ports]
-# Continue here
+
+def negative_sharpe_ratio(weights, average_returns, covariance_matrix, risk_free_rate):
+    portolio_returns = np.sum(average_returns * weights)
+    portfolio_volatility = np.sqrt(np.dot(weights.T, np.dot(covariance_matrix, weights)))
+    return (portolio_returns - risk_free_rate) / portfolio_volatility
+
+
+async def run_monte_carlo_sims(*args):
+    try:
+        symbol_df = await get_monte_symbol_data()
+        symbol_df = json.loads(symbol_df)
+        symbol_df = pd.DataFrame(symbol_df['data'])
+        symbol_df['date'] = pd.to_datetime(symbol_df['date'])
+        symbol_df = symbol_df.set_index(['date'])
+        closing_price = symbol_df['adjClose']
+        average_return = closing_price.pct_change().dropna()
+        train = average_return.iloc[:-30]
+        test = average_return.iloc[-30:]
+        T = len(test)
+        N = len(test)
+        S_O = closing_price[train.index[-1].date()]
+        mu = train.mean()
+        sigma = train.std()
+        sim_count = 1000
+        brownian_motion_sims = simulate_brownian(S_O, mu, sigma, sim_count, T, N)
+        LAST_TRAIN_DATE = train.index[-1].date()
+        FIRST_TEST_DATE = train.index[0].date()
+        LAST_TEST_DATE = train.index[-1].date()
+    except Exception as e:
+        print(e)
+
+
+def simulate_brownian(S_O, mu, sigma, n_sims, T, N):
+    dt = T / N
+    dW = np.random.normal(scale=np.sqrt(dt), size=(n_sims, N))
+    W = np.cumsum(dW, axis=1)
+    time_step = np.linspace(dt, T, N)
+    time_steps = np.broadcast_to(time_step, (n_sims, N))
+    S_t = S_O * np.exp((mu - 0.5 * sigma ** 2) * time_steps + sigma * W)
+    S_t = np.insert(S_t, 0, S_O, axis=1)
+    return S_t
+
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)
 add_event_listener(document.getElementById("make-simple-pred-btn"), "click", make_prediction)
 add_event_listener(document.getElementById("get-current-portfolio"), "click", portfolio_optimization)
-
+add_event_listener(document.getElementById("run-monte-carlo"), "click", run_monte_carlo_sims)
