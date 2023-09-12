@@ -358,7 +358,7 @@ async def run_monte_carlo_sims(*args):
         symbol_df = await get_monte_symbol_data()
         symbol_df = json.loads(symbol_df)
         symbol_df = pd.DataFrame(symbol_df['data'])
-        symbol_df['date'] = pd.to_datetime(symbol_df['date'])
+        symbol_df['date'] = pd.to_datetime(symbol_df['date'], format='%Y-%m-%d')
         symbol_df = symbol_df.set_index(['date'])
         closing_price = symbol_df['adjClose']
         average_return = closing_price.pct_change().dropna()
@@ -366,24 +366,30 @@ async def run_monte_carlo_sims(*args):
         test = average_return.iloc[-30:]
         T = len(test)
         N = len(test)
-        S_O = closing_price[train.index[-1].date()]
+        S_O = closing_price[train.index[-1]]
         mu = train.mean()
         sigma = train.std()
         sim_count = 1000
         brownian_motion_sims = simulate_brownian(S_O, mu, sigma, sim_count, T, N)
         LAST_TRAIN_DATE = train.index[-1].date()
-        FIRST_TEST_DATE = train.index[0].date()
-        LAST_TEST_DATE = train.index[-1].date()
+        FIRST_TEST_DATE = test.index[0].date()
+        LAST_TEST_DATE = test.index[-1].date()
         PLOT_TITLE = f"Simulation from {FIRST_TEST_DATE} to {LAST_TEST_DATE}"
         selected_indices = closing_price[LAST_TRAIN_DATE:LAST_TEST_DATE].index
         index = [date.date() for date in selected_indices]
         simulation_df = pd.DataFrame(np.transpose(brownian_motion_sims), index=index)
         print(simulation_df)
-        print(index)
-        print(selected_indices)
-        print(LAST_TRAIN_DATE)
+        fig, ax = plt.subplots()
+        ax.plot(index, simulation_df, color='black', alpha=0.2)
+        ax.plot(simulation_df.index, simulation_df.mean(axis=1), color='red', label='mean')
+        ax.plot(simulation_df.index, simulation_df.iloc[:, 0], color='blue', label='actual')
+        ax.legend()
+        ax.set_title('Simulation Data')
+        ax.set_xlabel('Index')
+        ax.set_ylabel('Value')
+        pyscript.display(plt, target="monte-chart-container")
     except Exception as e:
-        print(e)
+        print(f'The following error has occurred: {e}')
 
 
 def simulate_brownian(S_O, mu, sigma, n_sims, T, N):
