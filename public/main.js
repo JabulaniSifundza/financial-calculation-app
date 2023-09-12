@@ -462,7 +462,7 @@ async function get_monte_symbol_data(){
         })
         const data = await response.json()
         const financial_data = JSON.stringify(data)
-        //console.log(financial_data)
+        console.log(financial_data)
         return financial_data
     }
     catch(error){

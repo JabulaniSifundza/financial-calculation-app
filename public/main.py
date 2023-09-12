@@ -374,6 +374,16 @@ async def run_monte_carlo_sims(*args):
         LAST_TRAIN_DATE = train.index[-1].date()
         FIRST_TEST_DATE = train.index[0].date()
         LAST_TEST_DATE = train.index[-1].date()
+        PLOT_TITLE = f"Simulation from {FIRST_TEST_DATE} to {LAST_TEST_DATE}"
+        selected_indices = closing_price[LAST_TRAIN_DATE:LAST_TEST_DATE].index
+        index = [date.date() for date in selected_indices]
+        simulation_df = pd.DataFrame(np.transpose(brownian_motion_sims), index=index)
+        ax = simulation_df.plot(alpha=0.2, legend=False)
+        line_1 = ax.plot(index, simulation_df.mean(axis=1), color='red')
+        line_2 = ax.plot(index, closing_price[LAST_TRAIN_DATE:LAST_TEST_DATE], color='blue')
+        ax.set_title(PLOT_TITLE, fontsize=16)
+        ax.legend((line_1, line_2), ('mean', 'actual'))
+        pyscript.display(ax, target="monte-chart-container")
     except Exception as e:
         print(e)
 
