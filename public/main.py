@@ -6,7 +6,8 @@ import scipy.optimize as sco
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score
 import json
-from js import structure_simple_model_data, structure_data, document, get_portfolio_data, get_monte_symbol_data
+import warnings
+from js import structure_simple_model_data, structure_data, document, get_portfolio_data, get_monte_symbol_data, get_VaR_portfolio, get_share_counts
 from pyodide.ffi.wrappers import add_event_listener
 # Capm
 # The Formula for CAPM: Expected Return = (Beta * (Return of the Market - Risk Free Rate)) + Risk free rate
@@ -355,6 +356,7 @@ def negative_sharpe_ratio(weights, average_returns, covariance_matrix, risk_free
 
 async def run_monte_carlo_sims(*args):
     try:
+        warnings.filterwarnings('ignore')
         symbol_df = await get_monte_symbol_data()
         symbol_df = json.loads(symbol_df)
         symbol_df = pd.DataFrame(symbol_df['data'])
@@ -378,16 +380,24 @@ async def run_monte_carlo_sims(*args):
         selected_indices = closing_price[LAST_TRAIN_DATE:LAST_TEST_DATE].index
         index = [date.date() for date in selected_indices]
         simulation_df = pd.DataFrame(np.transpose(brownian_motion_sims), index=index)
-        print(simulation_df)
         fig, ax = plt.subplots()
-        ax.plot(index, simulation_df, color='black', alpha=0.2)
+        ax.plot(index, simulation_df, color='green', alpha=0.1)
         ax.plot(simulation_df.index, simulation_df.mean(axis=1), color='red', label='mean')
         ax.plot(simulation_df.index, simulation_df.iloc[:, 0], color='blue', label='actual')
         ax.legend()
         ax.set_title('Simulation Data')
-        ax.set_xlabel('Index')
-        ax.set_ylabel('Value')
+        ax.set_xlabel('Index (Date)')
+        ax.set_ylabel('Value ($)')
         pyscript.display(plt, target="monte-chart-container")
+        top_ten = np.percentile(simulation_df, 100 - 10)
+        bottom_ten = np.percentile(simulation_df, 10)
+        monte_carlo_percentile_div = js.document.querySelector('#monte-carlo-percentiles')
+        top_10th_percentile = js.document.createElement("p")
+        top_10th_percentile.innerHTML = f"Top 10th Percentile expected simulated price: $ {top_ten:.2f}"
+        bottom_10th_percentile = js.document.createElement("p")
+        bottom_10th_percentile.innerHTML = f"Bottom 10th Percentile expected simulated price: $ {bottom_ten:.2f}"
+        monte_carlo_percentile_div.appendChild(top_10th_percentile)
+        monte_carlo_percentile_div.appendChild(bottom_10th_percentile)
     except Exception as e:
         print(f'The following error has occurred: {e}')
 
@@ -402,9 +412,30 @@ def simulate_brownian(S_O, mu, sigma, n_sims, T, N):
     S_t = np.insert(S_t, 0, S_O, axis=1)
     return S_t
 
+# Value-at-Risk : Reports the worst expected loss at a given confidence level/interval
+# E.g Let's say that the 1-day 95% VaR of our portfolio is $100. This means that 95% of the time (under normal market conditions), we will not lose more than $100 by holding our portfolio over one day.
+
+
+async def get_var_data():
+    data = await get_VaR_portfolio()
+    [portfolio_data, ticker_symbols] = data
+    portfolio_data = json.loads(portfolio_data)
+    ticker_symbols = json.loads(ticker_symbols)
+    return [portfolio_data, ticker_symbols]
+
+
+async def calculate_var():
+    [portfolio, tickers] = await get_var_data()
+    share_count_list = get_share_counts()
+    share_count_list = json.loads(share_count_list)
+    T = 1
+    SIM_COUNT = 10 ** 5
+    portfolio_df = pd.DataFrame(portfolio)
+    print(portfolio_df)
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)
 add_event_listener(document.getElementById("make-simple-pred-btn"), "click", make_prediction)
 add_event_listener(document.getElementById("get-current-portfolio"), "click", portfolio_optimization)
 add_event_listener(document.getElementById("run-monte-carlo"), "click", run_monte_carlo_sims)
+add_event_listener(document.getElementById("calculate-VaR-btn"), "click", calculate_var)

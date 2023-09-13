@@ -470,3 +470,60 @@ async function get_monte_symbol_data(){
         alert(`Unfortunately the following error has occurred: ${error}`);
     }
 }
+
+async function get_VaR_portfolio(){
+    try{
+        const response = await fetch("/api/value-at-risk", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker_symbol: "ticker"
+            })
+        })
+        const data = await response.json()
+        const portfolio_obj = data['data']
+        const symbol_arr = Object.keys(portfolio_obj)
+
+        const str_portfolio_obj = JSON.stringify(portfolio_obj)
+        const str_symbol_arr = JSON.stringify(symbol_arr)
+        const input_div = document.getElementById("VaR-share-count-inputs")
+        const var_btn_div = document.getElementById("VaR-btn-container")
+        symbol_arr.map((symbol)=>{
+            const html = `
+            <p>Ticker: ${symbol}</p>
+            <input type="number" name="VaR-ticker-shares" placeholder="Number of shares for ${symbol}">
+            `;
+            const inpt_child_div = document.createElement("div");
+            inpt_child_div.innerHTML = html;
+            input_div.appendChild(inpt_child_div)
+        })
+        var_btn_div.style.display = "block"
+        console.log(symbol_arr)
+        return [str_portfolio_obj, str_symbol_arr]
+    }
+    catch(error){
+        console.log(error)
+        alert(`Unfortunately the following error has occurred: ${error}`);
+    }
+}
+
+document.getElementById("run-monte-carlo").addEventListener("click", ()=>{
+    get_VaR_portfolio()
+})
+
+function get_share_counts(){
+    const share_counts = document.getElementsByName("VaR-ticker-shares")
+    const share_count_arr = []
+    share_counts.forEach(count =>{
+        //console.log(count.value)
+        share_count_arr.push(count.value)
+    })
+    const final_arr = JSON.stringify(share_count_arr)
+    return final_arr
+}
+
+
+
+

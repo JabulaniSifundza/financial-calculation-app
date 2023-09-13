@@ -93,6 +93,17 @@ app.post('/api/monte-carlo', async(req, res)=>{
     }
 })
 
+app.post('/api/value-at-risk', async(req, res)=>{
+    const {ticker_symbol} = req.body
+    try{
+        const data = stock_ticker_data
+        res.status(200).json({data})
+    }
+    catch(error){
+        res.status(500).json({error: error.name, msg: error.message})
+    }
+})
+
 app.get('/my-html-file', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
