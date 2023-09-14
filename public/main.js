@@ -485,7 +485,6 @@ async function get_VaR_portfolio(){
         const data = await response.json()
         const portfolio_obj = data['data']
         const symbol_arr = Object.keys(portfolio_obj)
-
         const str_portfolio_obj = JSON.stringify(portfolio_obj)
         const str_symbol_arr = JSON.stringify(symbol_arr)
         const input_div = document.getElementById("VaR-share-count-inputs")
@@ -509,9 +508,6 @@ async function get_VaR_portfolio(){
     }
 }
 
-document.getElementById("run-monte-carlo").addEventListener("click", ()=>{
-    get_VaR_portfolio()
-})
 
 function get_share_counts(){
     const share_counts = document.getElementsByName("VaR-ticker-shares")
