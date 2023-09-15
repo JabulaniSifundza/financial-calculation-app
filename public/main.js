@@ -64,6 +64,7 @@ async function calculate_capm(){
         const beta_data = JSON.stringify(company_beta_values)
         create_symbol_selector("company-financials-selector", "ticker-symbol")
         create_symbol_selector("monte-carlo-sim-selector", "ticker-symbol")
+        create_symbol_selector("save-company-data-selector", "ticker-symbol")
         //console.log(beta_data)
         return [stock_prices, benchmark_prices, risk_free_rate, beta_data]
     }
@@ -538,7 +539,7 @@ async function save_all_financial_data(){
 }
 
 async function save_company_financial_data(){
-    const company_selector = document.getElementById("monte-carlo-sim-selector")
+    const company_selector = document.getElementById("save-company-data-selector")
     const selected_ticker = company_selector.options[company_selector.selectedIndex]
     const symbol = selected_ticker.value.toUpperCase()
     try{
@@ -548,14 +549,73 @@ async function save_company_financial_data(){
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                ticker_symbol: "ticker"
+                ticker_symbol: symbol
             })
         })
+        const data = await response.json()
+        const financials = data.financial_data
+        const stock_info = data.stock_price_data
+        const [balance_sheet, cash_flow, income, summary] = financials
+        const balance_sheet_data = balance_sheet.balanceSheetStatements
+        const income_statements = income.incomeStatementHistory
+        const format_balance_sheet_data = balance_sheet_data.map((sheet)=>{
+            const sheet_object = {
+                "Year Ended": [sheet.endDate],
+                "Accounts Receivable": [sheet.netReceivables],
+                "Cash": [sheet.cash],
+                "Inventory": [sheet.inventory],
+                "Short Term Investments": [sheet.shortTermInvestments],
+                "Other Current Assets": [sheet.otherCurrentAssets],
+                "Current Assets": [sheet.totalCurrentAssets],
+                "Property, Plant & Equipment": [sheet.propertyPlantEquipment],
+                "Investments": [sheet.longTermInvestments],
+                "Tangible Assets": [sheet.netTangibleAssets],
+                "Other Assets": [sheet.otherAssets],
+                "Total Assets": [sheet.totalAssets],
+                "Accounts Payable": [sheet.accountsPayable],
+                "Short-term Debt": [sheet.shortLongTermDebt],
+                "Other Current Liabilties": [sheet.otherCurrentLiab],
+                "Total Current Liabilities": [sheet.totalCurrentLiabilities],
+                "Long-term Debt": [sheet.longTermDebt],
+                "Other Long-term Liabilities": [sheet.otherLiab],
+                "Total Liabilities": [sheet.totalLiab],
+                "Common Stock": [sheet.commonStock],
+                "Treasury Stock": [sheet.treasuryStock],
+                "Total Stockholder Equity": [sheet.totalStockholderEquity],
+                "Other Stockholder Equity": [sheet.otherStockholderEquity],
+                "Retained Earnings": [sheet.retainedEarnings]
+            }
+            return sheet_object
+        })
+        const format_income_statement_data = income_statements.map((statement)=>{
+            const statment_object = {
+                "Year Ended": [statement.endDate],
+                "Revenue": [statement.totalRevenue],
+                "COGS": [statement.costOfRevenue],
+                "Gross Profit": [statement.grossProfit],
+                "Research and Development": [statement.researchDevelopment ? statement.researchDevelopment : 0],
+                "SGA": [statement.sellingGeneralAdministrative],
+                "Other Operating Costs": [statement.otherOperatingExpenses ? statement.otherOperatingExpenses : 0],
+                "Total Operating Costs": [statement.totalOperatingExpenses],
+                "Other": [statement.otherItems ? statement.otherItems : 0],
+                "Operating Income": [statement.operatingIncome],
+                "Income Tax Expense": [statement.incomeTaxExpense],
+                "EBIT": [statement.ebit],
+                "Interest Expense": [statement.interestExpense],
+                "Net Income": [statement.netIncome]
+            }
+            return statment_object
+        })
+        console.log(income)
     }
     catch(error){
+        console.log(error)
         
     }
 }
 
+document.getElementById("save-company-financial-data").addEventListener("click", ()=>{
+    save_company_financial_data()
+})
 
 

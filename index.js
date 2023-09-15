@@ -104,6 +104,18 @@ app.post('/api/value-at-risk', async(req, res)=>{
     }
 })
 
+app.post('/api/save-company-financial-data', async(req, res)=>{
+    const {ticker_symbol} = req.body
+    try{
+        const data = stock_ticker_data[ticker_symbol]
+        const financial_data = company_financial_data[ticker_symbol]
+        res.status(200).json({stock_price_data: data, financial_data: financial_data})
+    }
+    catch(error){
+        res.status(500).json({error: error.name, msg: error.message})
+    }
+})
+
 app.get('/my-html-file', (req, res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
