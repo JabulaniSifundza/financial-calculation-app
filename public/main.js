@@ -558,6 +558,7 @@ async function save_company_financial_data(){
         const [balance_sheet, cash_flow, income, summary] = financials
         const balance_sheet_data = balance_sheet.balanceSheetStatements
         const income_statements = income.incomeStatementHistory
+        const cash_flow_statements = cash_flow.cashflowStatements
         const format_balance_sheet_data = balance_sheet_data.map((sheet)=>{
             const sheet_object = {
                 "Year Ended": [sheet.endDate],
@@ -606,7 +607,30 @@ async function save_company_financial_data(){
             }
             return statment_object
         })
-        console.log(income)
+        const format_cash_flow_data = cash_flow_statements.map((flow)=>{
+            const cash_object = {
+                "Year Ended": [flow.endDate],
+                "Net Income": [flow.netIncome],
+                "Change to Net Income": [flow.changeToNetincome],
+                "Change In Cash": [flow.changeInCash],
+                "Change to Inventory": [flow.changeToInventory],
+                "Change to Accounts Receivable": [flow.changeToAccountReceivables],
+                "Depreciation": [flow.depreciation],
+                "Dividends Paid": [flow.dividendsPaid],
+                "Change to Operating Activities": [flow.changeToOperatingActivities],
+                "Total Cash From Operations": [flow.totalCashFromOperatingActivities],
+                "Stock Repurchase": [flow.repurchaseOfStock],
+                "Net Borrowing": [flow.netBorrowings],
+                "Other Cash Flow From Financing Activities": [flow.otherCashflowsFromFinancingActivities],
+                "Total Cash From Financing Activities": [flow.totalCashFromFinancingActivities],
+                "Capital Expenditures": [flow.capitalExpenditures],
+                "Investments": [flow.investments],
+                "Other Investing Activities": [flow.otherCashflowsFromInvestingActivities],
+                "Total Cash From Investing Activities": [flow.totalCashflowsFromInvestingActivities]
+            }
+            return cash_object
+        })
+        console.log(format_balance_sheet_data)
     }
     catch(error){
         console.log(error)
