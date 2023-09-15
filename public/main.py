@@ -420,49 +420,56 @@ def simulate_brownian(S_O, mu, sigma, n_sims, T, N):
 
 
 async def calculate_var(*args):
-    share_count_list = get_share_counts()
-    data = value_at_risk_data
-    [portfolio_data, ticker_symbols] = data
-    portfolio_data = json.loads(portfolio_data)
-    ticker_symbols = json.loads(ticker_symbols)
-    share_count_list = json.loads(share_count_list)
-    share_count_list = np.array(share_count_list, dtype=np.float64)
-    T = 1
-    SIM_COUNT = 10 ** 5
-    # portfolio_df = pd.DataFrame(portfolio_data)
-    # flattened_data = [dict(company=company, **values) for company, company_data in portfolio_data.items() for values in company_data]
-    flattened_data = []
-    for company, company_data in portfolio_data.items():
-        for record in company_data:
-            record['company'] = company
-            flattened_data.append(record)
-    portfolio_df = pd.DataFrame(flattened_data)
-    portfolio_df['date'] = pd.to_datetime(portfolio_df['date'])
-    portfolio_df.set_index('date', inplace=True)
-    portfolio_df = portfolio_df.pivot(columns='company')
-    portfolio_df.columns = portfolio_df.columns.to_flat_index().map(lambda x: (x[0].title().replace(' ', ''), x[1]))
-    adj_close = portfolio_df['Adjclose']
-    returns = adj_close.pct_change().dropna()
-    covariance_matrix = returns.cov()
-    # Cholesky decomposition of covariance matrix
-    chol_mat = np.linalg.cholesky(covariance_matrix)
-    random_vals = np.random.normal(size=(SIM_COUNT, len(ticker_symbols)))
-    correlated_random_vals = np.transpose(np.matmul(chol_mat, np.transpose(random_vals)))
-    # Metrics for simulations
-    r = np.mean(returns, axis=0).values
-    sigma = np.std(returns, axis=0).values
-    S_O = adj_close.values[-1, :]
-    P_O = np.sum(share_count_list * S_O)
-    S_T = S_O * np.exp((r - 0.5 * sigma ** 2) * T + sigma * np.sqrt(T) * correlated_random_vals)
-    P_T = np.sum(share_count_list * S_T, axis=1)
-    P_diff = P_T - P_O
-    P_diff_sorted = np.sort(P_diff)
-    percentiles = [0.01, 0.1, 1.]
-    value_at_risk = np.percentile(P_diff_sorted, percentiles)
-    for x, y in zip(percentiles, value_at_risk):
-        print(f"1-day Value at Risk with {100 - x}% confidence: $ {-y:.2f}")
-    # Expected shortfall
-    # Expected Shortfall (also known as conditional VaR or expected tail loss) comes into play. It simply states what the expected loss is in the worst X% of scenarios.
+    try:
+        share_count_list = get_share_counts()
+        data = value_at_risk_data
+        [portfolio_data, ticker_symbols] = data
+        portfolio_data = json.loads(portfolio_data)
+        ticker_symbols = json.loads(ticker_symbols)
+        share_count_list = json.loads(share_count_list)
+        share_count_list = np.array(share_count_list, dtype=np.float64)
+        T = 1
+        SIM_COUNT = 10 ** 5
+        # portfolio_df = pd.DataFrame(portfolio_data)
+        # flattened_data = [dict(company=company, **values) for company, company_data in portfolio_data.items() for values in company_data]
+        flattened_data = []
+        for company, company_data in portfolio_data.items():
+            for record in company_data:
+                record['company'] = company
+                flattened_data.append(record)
+        portfolio_df = pd.DataFrame(flattened_data)
+        portfolio_df['date'] = pd.to_datetime(portfolio_df['date'])
+        portfolio_df.set_index('date', inplace=True)
+        portfolio_df = portfolio_df.pivot(columns='company')
+        portfolio_df.columns = portfolio_df.columns.to_flat_index().map(lambda x: (x[0].title().replace(' ', ''), x[1]))
+        adj_close = portfolio_df['Adjclose']
+        returns = adj_close.pct_change().dropna()
+        covariance_matrix = returns.cov()
+        # Cholesky decomposition of covariance matrix
+        chol_mat = np.linalg.cholesky(covariance_matrix)
+        random_vals = np.random.normal(size=(SIM_COUNT, len(ticker_symbols)))
+        correlated_random_vals = np.transpose(np.matmul(chol_mat, np.transpose(random_vals)))
+        # Metrics for simulations
+        r = np.mean(returns, axis=0).values
+        sigma = np.std(returns, axis=0).values
+        S_O = adj_close.values[-1, :]
+        P_O = np.sum(share_count_list * S_O)
+        S_T = S_O * np.exp((r - 0.5 * sigma ** 2) * T + sigma * np.sqrt(T) * correlated_random_vals)
+        P_T = np.sum(share_count_list * S_T, axis=1)
+        P_diff = P_T - P_O
+        P_diff_sorted = np.sort(P_diff)
+        percentiles = [0.01, 0.1, 1.]
+        value_at_risk = np.percentile(P_diff_sorted, percentiles)
+        var_div = js.document.querySelector('#VaR-calculations')
+        for x, y in zip(percentiles, value_at_risk):
+            # print(f"1-day Value at Risk with {100 - x}% confidence: $ {-y:.2f}")
+            portfolio_var = js.document.querySelector("p")
+            portfolio_var.innerHTML = f"1-day Value at Risk with {100 - x}% confidence: $ {-y:.2f}"
+            var_div.appendChild(portfolio_var)
+        # Expected shortfall
+        # Expected Shortfall (also known as conditional VaR or expected tail loss) comes into play. It simply states what the expected loss is in the worst X% of scenarios.
+    except Exception as e:
+        print(e)
 
 add_event_listener(document.getElementById("search-companies-btn"), "click", company_data)
 add_event_listener(document.getElementById("create-simple-model"), "click", simple_model_data)

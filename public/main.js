@@ -520,6 +520,42 @@ function get_share_counts(){
     return final_arr
 }
 
+async function save_all_financial_data(){
+    try{
+        const response = await fetch("/api/save-financial-data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker_symbol: "ticker"
+            })
+        })
+    }
+    catch(error){
+        
+    }
+}
+
+async function save_company_financial_data(){
+    const company_selector = document.getElementById("monte-carlo-sim-selector")
+    const selected_ticker = company_selector.options[company_selector.selectedIndex]
+    const symbol = selected_ticker.value.toUpperCase()
+    try{
+        const response = await fetch("/api/save-company-financial-data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                ticker_symbol: "ticker"
+            })
+        })
+    }
+    catch(error){
+        
+    }
+}
 
 
 
