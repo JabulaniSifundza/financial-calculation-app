@@ -630,7 +630,39 @@ async function save_company_financial_data(){
             }
             return cash_object
         })
-        console.log(format_balance_sheet_data)
+        
+        //
+        const balance_sheet_ws_data = format_balance_sheet_data
+        const income_statement_ws_data = format_income_statement_data
+        const cash_flow_statement_ws_data = format_cash_flow_data
+
+        const balance_sheet_ws = []
+        const cash_sheet_ws = []
+        const income_statement_ws = []
+        balance_sheet_ws_data.map((obj)=>{
+            for(const key in obj){
+                balance_sheet_ws.push([key, ...obj[key]])
+            }
+        })
+        income_statement_ws_data.map((obj)=>{
+            for(const key in obj){
+                income_statement_ws.push([key, ...obj[key]])
+            }
+        })
+        cash_flow_statement_ws_data.map((obj)=>{
+            for(const key in obj){
+                cash_sheet_ws.push([key, ...obj[key]])
+            }
+        })
+        console.log(stock_info)
+        //const balance_sheet_xlsx = XLSX.utils.aoa_to_sheet(balance_sheet_ws)
+        //const income_sheet_xlsx = XLSX.utils.aoa_to_sheet(income_statement_ws)
+        //const cash_sheet_xlsx = XLSX.utils.aoa_to_sheet(cash_sheet_ws)
+        //const workbook = XLSX.utils.book_new()
+        //XLSX.utils.book_append_sheet(workbook, balance_sheet_xlsx, "Balance Sheets")
+        //XLSX.utils.book_append_sheet(workbook, income_sheet_xlsx, "Income Statements")
+        //XLSX.utils.book_append_sheet(workbook, cash_sheet_xlsx, "Cash Flows")
+        //XLSX.writeFile(workbook, `${symbol}-financials.xlsx`)
     }
     catch(error){
         console.log(error)
