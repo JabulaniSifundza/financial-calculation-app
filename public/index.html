@@ -25,36 +25,41 @@
         <header></header>
         <div class="main-container">
             <div class="main-section" id="company-research">
-                <h3>Company Financials</h3>
-                <div class="" id="capm-container">
-                    <h5>
-                        CAPM
-                    </h5>
-                    <small>
-                        Search companies by their ticker symbols to view financials and calculate various metrics
-                    </small>
-                    <div class="" id="ticker-inputs">
-                        <input type="text" name="ticker-symbol" placeholder="Company ticker" class="ticker-symbol">
+                <div class="main-card">
+                    <h3>Company Financials</h3>
+                    <p>
+                        Please start here. Add the ticker symbols for the companies you would like to research.
+                        <br>
+                        These are the companies that will make up your portfolio.
+                    </p>
+                    <div class="" id="capm-container">
+                        <h5>
+                            CAPM
+                        </h5>
+                        <small>
+                            Search companies by their ticker symbols to view financials and calculate various metrics
+                        </small>
+                        <div class="" id="ticker-inputs">
+                            <input type="text" name="ticker-symbol" placeholder="Company ticker" class="ticker-symbol">
+                        </div>
+                        <div>
+                            <button type="button" class="add-ticker" id="add-ticker-btn">Add Ticker</button>
+                        </div>
+                        <div>
+                            <label for="">
+                                Benchmark
+                                <select name="benchmark" id="benchmark">
+                                    <option value="^GSPC">S&P 500</option>
+                                    <option value="^DJI;">Dow Jones</option>
+                                    <option value="^IXIC">Nasdaq Composite Index</option>
+                                </select>
+                            </label>
+                        </div>
+                        <div>
+                            <button type="button" class="search-companies-btn" id="search-companies-btn">Search</button>
+                        </div>
                     </div>
-                    <div>
-                        <button type="button" class="add-ticker" id="add-ticker-btn">Add Ticker</button>
-                    </div>
-                    <div>
-                        <label for="">
-                            Benchmark
-                            <select name="benchmark" id="benchmark">
-                                <option value="^GSPC">S&P 500</option>
-                                <option value="^DJI;">Dow Jones</option>
-                                <option value="^IXIC">Nasdaq Composite Index</option>
-                            </select>
-                        </label>
-                    </div>
-                    <div>
-                        <button type="button" class="search-companies-btn" id="search-companies-btn">Search</button>
-                    </div>
-                </div>
-                <div id="div-to-insert">
-
+                    <div id="div-to-insert"></div>
                 </div>
             </div>
 
@@ -153,7 +158,7 @@
 
         </div>
         <footer>
-            <div class="footer-btn" data-pagename="" data-colour="#">
+            <div class="footer-btn" data-pagename="company-research" id="defaultOpen">
                 <span class="material-symbols-sharp">
                     attach_money
                 </span>
@@ -162,7 +167,7 @@
                 </p>
             </div>
 
-            <div class="footer-btn" data-pagename="" data-colour="#">
+            <div class="footer-btn" data-pagename="portfolio-optimization">
                 <span class="material-symbols-sharp">
                     pie_chart
                 </span>
@@ -172,7 +177,7 @@
             </div>
 
 
-            <div class="footer-btn" data-pagename="" data-colour="#">
+            <div class="footer-btn" data-pagename="company-trends">
                 <span class="material-symbols-sharp">
                     finance
                 </span>
@@ -181,7 +186,7 @@
                 </p>
             </div>
 
-            <div class="footer-btn" data-pagename="" data-colour="#">
+            <div class="footer-btn" data-pagename="ml-projections">
                 <span class="material-symbols-sharp">
                     query_stats
                 </span>
@@ -190,7 +195,7 @@
                 </p>
             </div>
 
-            <div class="footer-btn" data-pagename="" data-colour="#">
+            <div class="footer-btn" data-pagename="monte-carlo">
                 <span class="material-symbols-sharp">
                     shuffle
                 </span>

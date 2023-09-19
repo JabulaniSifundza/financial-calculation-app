@@ -639,6 +639,7 @@ async function save_company_financial_data(){
         const balance_sheet_ws = []
         const cash_sheet_ws = []
         const income_statement_ws = []
+        const stock_price_ws = []
         balance_sheet_ws_data.map((obj)=>{
             for(const key in obj){
                 balance_sheet_ws.push([key, ...obj[key]])
@@ -654,15 +655,35 @@ async function save_company_financial_data(){
                 cash_sheet_ws.push([key, ...obj[key]])
             }
         })
-        console.log(stock_info)
-        //const balance_sheet_xlsx = XLSX.utils.aoa_to_sheet(balance_sheet_ws)
-        //const income_sheet_xlsx = XLSX.utils.aoa_to_sheet(income_statement_ws)
-        //const cash_sheet_xlsx = XLSX.utils.aoa_to_sheet(cash_sheet_ws)
-        //const workbook = XLSX.utils.book_new()
-        //XLSX.utils.book_append_sheet(workbook, balance_sheet_xlsx, "Balance Sheets")
-        //XLSX.utils.book_append_sheet(workbook, income_sheet_xlsx, "Income Statements")
-        //XLSX.utils.book_append_sheet(workbook, cash_sheet_xlsx, "Cash Flows")
-        //XLSX.writeFile(workbook, `${symbol}-financials.xlsx`)
+        const stock_info_data = stock_info.map((dataFrame)=>{
+           const stock_prices_object = {
+                "Date": [dataFrame.date],
+                "Open": [dataFrame.open],
+                "High": [dataFrame.high],
+                "Low": [dataFrame.low],
+                "Close": [dataFrame.close],
+                "Adjusted Closing Price": [dataFrame.adjClose],
+                "Volume": [dataFrame.volume]
+           }
+           return stock_prices_object
+        })
+        const stock_price_info_obj = stock_info_data
+        stock_price_info_obj.map((obj)=>{
+            for(const key in obj){
+                stock_price_ws.push([key, ...obj[key]])
+            }
+        })
+        console.log(stock_price_info_obj)
+        const balance_sheet_xlsx = XLSX.utils.aoa_to_sheet(balance_sheet_ws)
+        const income_sheet_xlsx = XLSX.utils.aoa_to_sheet(income_statement_ws)
+        const cash_sheet_xlsx = XLSX.utils.aoa_to_sheet(cash_sheet_ws)
+        const stock_prices_xlsx = XLSX.utils.aoa_to_sheet(stock_price_ws)
+        const workbook = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(workbook, balance_sheet_xlsx, "Balance Sheets")
+        XLSX.utils.book_append_sheet(workbook, income_sheet_xlsx, "Income Statements")
+        XLSX.utils.book_append_sheet(workbook, cash_sheet_xlsx, "Cash Flows")
+        XLSX.utils.book_append_sheet(workbook, stock_prices_xlsx, "Stock Prices")
+        XLSX.writeFile(workbook, `${symbol}-financials.xlsx`)
     }
     catch(error){
         console.log(error)
@@ -674,4 +695,30 @@ document.getElementById("save-company-financial-data").addEventListener("click",
     save_company_financial_data()
 })
 
+function openTab(pageName){
+    var i, tabcontent;
+    tabcontent = document.getElementsByClassName("main-section");
+    const tabbuttons = document.querySelectorAll('.footer-btn')
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    document.getElementById(pageName).style.display = "block";
+}
+
+function footerEventListeners(parent, className){
+    var children = parent.querySelectorAll(`.${className}`);
+    for (var i = 0; i < children.length; i++) {
+        children[i].addEventListener("click", function() {
+            //console.log(this.dataset.pagename, this.dataset.colour)
+            openTab(this.dataset.pagename);
+        });
+    
+    }
+}
+
+window.onload = function(){
+    const footerEl = document.querySelector('footer');
+    footerEventListeners(footerEl, "footer-btn")
+    document.getElementById("defaultOpen").click(); 
+}
 
