@@ -39,13 +39,17 @@
                         <small>
                             Search companies by their ticker symbols to view financials and calculate various metrics
                         </small>
-                        <div class="" id="ticker-inputs">
-                            <input type="text" name="ticker-symbol" placeholder="Company ticker" class="ticker-symbol">
+                        <div class="ticker-inputs" id="ticker-inputs">
+                            <input type="text" name="ticker-symbol" placeholder="Company Ticker" class="ticker-symbol">
                         </div>
-                        <div>
-                            <button type="button" class="add-ticker" id="add-ticker-btn">Add Ticker</button>
+                        <div class="add-ticker-div">
+                            <button type="button" class="add-ticker" id="add-ticker-btn">
+                                <span class="material-symbols-rounded">
+                                add
+                                </span>
+                            </button>
                         </div>
-                        <div>
+                        <div class="benchmark-div">
                             <label for="">
                                 Benchmark
                                 <select name="benchmark" id="benchmark">
@@ -59,13 +63,18 @@
                             <button type="button" class="search-companies-btn" id="search-companies-btn">Search</button>
                         </div>
                     </div>
-                    <div id="div-to-insert"></div>
+                    <div class="capm-breakdown" id="div-to-insert"></div>
                 </div>
             </div>
 
             <div class="main-section" id="portfolio-optimization">
-                <div>
-                    <button id="get-current-portfolio">Portfolio</button>
+                <div class="main-card">
+                    <h3>
+                        Portfolio Optimization
+                    </h3>
+                    <div class="optimize-portfolio-div">
+                        <button id="get-current-portfolio" class="optimize-btn">Run Portfolio Optimization</button>
+                    </div>
                 </div>
                 <div id="chartContainer"></div>
                 <div id="portfolio-breakdown-1"></div>
@@ -78,9 +87,9 @@
             
 
             <div class="main-section" id="ml-projections">
-                <div id="simple-linear-model">
+                <div id="simple-linear-model" class="main-card">
                     <h3>
-                        Simple Linear Model
+                        Logistic Regression
                     </h3>
                     <div id="added-ticker-symbols">
                         <select name="Simple model selector" id="simple-model-ticker-selector">
@@ -106,15 +115,25 @@
                 </div>
             </div>
             <div class="main-section" id="company-trends">
-                <div>
-                    <select name="Company Financials Selector" id="company-financials-selector">
-                        <option value="Default" selected>Select a Ticker symbol for financial data</option>
+                <div class="main-card">
+                    <h3>
+                        Company Financial Data
+                    </h3>
+                    <div class="save-financial-data-div">
+                    <select name="Company Financials Saver Selector" id="save-company-data-selector">
+                        <option value="Default" selected>Select a Ticker symbol to save data for</option>
                     </select>
+                    <button id="save-company-financial-data" class="save-data-btn">Save Company Data</button>
+                    </div>
+                    <div>
+                        <select name="Company Financials Selector" id="company-financials-selector">
+                            <option value="Default" selected>Select a Ticker symbol for financial data</option>
+                        </select>
+                        <div>
+                            <button type="button" id="get-company-financial-data" class="visualize-data-btn">Visualize Company Data</button>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <button type="button" id="get-company-financial-data">Get Financials</button>
-                </div>
-
                 <div id="data-visualizations">
                     <div id="current-asset-breakdown"></div>
                     <div id="total-liability-breakdown"></div>
@@ -125,26 +144,21 @@
                     <div id="operating-cost-breakdown" style="width: 600px; height: 600px; display: flex; justify-content: center; align-items: center"></div>
                     <div id="revenue-breakdown" style="width: 600px; height: 600px; display: flex; justify-content: center; align-items: center"></div>
                 </div>
-                <div id="financial-summary">
-
-                </div>
-
-                <div>
-                    <select name="Company Financials Saver Selector" id="save-company-data-selector">
-                        <option value="Default" selected>Select a Ticker symbol to save data for</option>
-                    </select>
-
-                    <button id="save-company-financial-data">Save Company Data</button>
-                </div>
+                <div id="financial-summary"></div>
             </div>
 
             <div class="main-section" id="monte-carlo">
-                <div>
-                    <select name="monte-carlo-sim-selector" id="monte-carlo-sim-selector">
-                        <option value="Default" selected>Select a Ticker symbol to run simulations</option>
-                    </select>
+                <div class="main-card">
+                    <h3>
+                        Monte Carlo Simulations
+                    </h3>
+                    <div>
+                        <select name="monte-carlo-sim-selector" id="monte-carlo-sim-selector">
+                            <option value="Default" selected>Select a Ticker symbol to run simulations</option>
+                        </select>
+                    </div>
+                    <button id="run-monte-carlo">Run Simulations</button>
                 </div>
-                <button id="run-monte-carlo">Run Simulations</button>
                 <div id="monte-chart-container"></div>
                 <div id="monte-carlo-percentiles"></div>
                 <div id="VaR-share-count-inputs">

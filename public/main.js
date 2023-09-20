@@ -6,7 +6,7 @@ document.getElementById("add-ticker-btn").addEventListener("click", ()=>{
     const new_ticker = document.createElement("input")
     new_ticker.setAttribute("type", "text")
     new_ticker.setAttribute("name", "ticker-symbol")
-    new_ticker.setAttribute("placeholder", "Ticker Symbol")
+    new_ticker.setAttribute("placeholder", "Company Ticker")
     ticker_inputs.appendChild(new_ticker)
 })
 
