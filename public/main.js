@@ -7,7 +7,31 @@ document.getElementById("add-ticker-btn").addEventListener("click", ()=>{
     new_ticker.setAttribute("type", "text")
     new_ticker.setAttribute("name", "ticker-symbol")
     new_ticker.setAttribute("placeholder", "Company Ticker")
+    new_ticker.className = 'animated-input'
     ticker_inputs.appendChild(new_ticker)
+
+    anime({
+        targets: '.add-ticker',
+        scale: [0.5, 1.10, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+
+
+    anime({
+        targets: '.animated-input',
+        opacity: [0, 1],
+        translateY: [-100, 0],
+        duration: 1200,
+        easing: 'easeOutExpo',
+        complete: function(anim) {
+            // Remove the class after animation
+            anim.animatables.forEach(animatable => {
+                animatable.target.classList.remove('animated-input');
+            });
+        }
+    })
 })
 
 function structure_data(){
@@ -167,7 +191,7 @@ document.getElementById("get-company-financial-data").addEventListener("click", 
         const [year,] = obj['endDate'].split("T")
         return year  
     }
-    console.log(current_financial_data)
+    //console.log(current_financial_data)
 
     // Calling functions for visualizations and summary
     drawCurrentAssetsPie()
@@ -500,7 +524,7 @@ async function get_VaR_portfolio(){
             input_div.appendChild(inpt_child_div)
         })
         var_btn_div.style.display = "block"
-        console.log(symbol_arr)
+        //console.log(symbol_arr)
         return [str_portfolio_obj, str_symbol_arr]
     }
     catch(error){
@@ -716,9 +740,151 @@ function footerEventListeners(parent, className){
     }
 }
 
+document.getElementById("search-companies-btn").addEventListener("click", ()=>{
+    anime({
+        targets: '#search-companies-btn',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    }) 
+    checkChildren("div-to-insert")
+     
+})
+
+anime({
+    targets: '.capm-breakdown p',
+    opacity: [0, 1],
+    translateY: [-100, 0],
+    duration: 2000,
+    easing: 'easeOutExpo',
+
+})
+
+document.getElementById("get-current-portfolio").addEventListener("click", ()=>{
+    anime({
+        targets: '#get-current-portfolio',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+    checkChildren("data-charts-portfolio")
+})
+
+document.getElementById("make-simple-pred-btn").addEventListener("click", ()=>{
+    anime({
+        targets: '#make-simple-pred-btn',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+    checkChildren("prediction-verdict")
+
+})
+
+document.getElementById("create-simple-model").addEventListener("click", ()=>{
+    anime({
+        targets: '#create-simple-model',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+    checkChildren("model-accuracy")
+})
+
+document.getElementById("save-company-financial-data").addEventListener("click", ()=>{
+    anime({
+        targets: '#save-company-financial-data',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+})
+
+document.getElementById("get-company-financial-data").addEventListener("click", ()=>{
+    anime({
+        targets: '#get-company-financial-data',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+})
+
+document.getElementById("run-monte-carlo").addEventListener("click", ()=>{
+    anime({
+        targets: '#run-monte-carlo',
+        scale: [0.75, 1.05, 1],
+        duration: 1000,
+        backgroundColor: ['#000000', '#2F98E7'],
+        easing: 'spring(1, 80, 10, 0)'
+    })
+    checkChildren("monte-chart-container")
+})
+
+anime({
+    targets: '#mySvg',
+    opacity: [0, 0.25, 0.5, 1],
+    easing: 'easeInOutSine',
+    duration: 1200,
+    direction: 'alternate',
+    loop: true,
+    easing: 'spring(1, 80, 10, 0)'
+});
+
+function checkChildren(container){
+    const divElement = document.getElementById(container);
+    if (divElement.childElementCount !== 0) {
+        document.querySelector('.loading-screen').style.display = 'none';
+        document.querySelector('.main').style.display = 'block';
+    }
+    else{
+        document.querySelector('.main').style.display = 'none';
+        document.querySelector('.loading-screen').style.display = 'flex';
+        setTimeout(function() {
+            document.querySelector('.loading-screen').style.display = 'none';
+            document.querySelector('.main').style.display = 'block';
+        }, 15000);
+    }
+
+}
+
+
+function longerCheckChildren(container){
+    const divElement = document.getElementById(container);
+    if (divElement.childElementCount !== 0) {
+        document.querySelector('.loading-screen').style.display = 'none';
+        document.querySelector('.main').style.display = 'block';
+    }
+    else{
+        document.querySelector('.main').style.display = 'none';
+        document.querySelector('.loading-screen').style.display = 'flex';
+        setTimeout(function() {
+            document.querySelector('.loading-screen').style.display = 'none';
+            document.querySelector('.main').style.display = 'block';
+        }, 32000);
+    }
+
+}
+
 window.onload = function(){
     const footerEl = document.querySelector('footer');
     footerEventListeners(footerEl, "footer-btn")
-    document.getElementById("defaultOpen").click(); 
+    document.getElementById("defaultOpen").click();
+    setTimeout(function() {
+        document.querySelector('.loading-screen').style.display = 'none';
+        document.querySelector('.main').style.display = 'block';
+        anime({
+        targets: '.main-card',
+        opacity: [0, 1],
+        translateY: [-200, 0],
+        duration: 1600,
+        easing: 'easeOutExpo',
+    })
+    }, 20500);
 }
 

@@ -166,8 +166,7 @@ input[type="text"]{
     border-radius: 6px;
     padding-left: 10px;
     border: none;
-    box-shadow: rgb(47, 152, 231) 3px 3px 6px 0px inset, rgba(47, 152, 231, 0.25) -3px -3px 6px 1px inset;
-    
+    box-shadow: rgb(47, 152, 231) 3px 3px 6px 0px inset, rgba(47, 152, 231, 0.25) -3px -3px 6px 1px inset;   
 }
 
 select{
@@ -195,6 +194,7 @@ select{
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 60px;
+    margin-top: 30px;
 }
 .add-ticker-div{
     margin-right: auto;
@@ -266,9 +266,11 @@ button{
     border: none;
 }
 
-.save-financial-data-div{
+.save-financial-data-div {
     display: flex;
     flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
 }
 
 .save-data-btn{
@@ -289,4 +291,149 @@ button{
     border-radius: 6px;
     box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
     border: none;
+}
+
+.create-model-btn{
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    width: 200px;
+    height: 45px;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    border: none;
+}
+
+.data-charts-portfolio{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    margin-top: 120px;
+}
+
+.prediction-data{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    margin-right: auto;
+    margin-left: auto;
+    align-items: center;
+    justify-items: center;
+}
+
+.prediction-data input[type="number"]{
+    width: 150px;
+    height: 45px;
+    border-radius: 6px;
+    padding-left: 10px;
+    border: none;
+    box-shadow: rgb(47, 152, 231) 3px 3px 6px 0px inset, rgba(47, 152, 231, 0.25) -3px -3px 6px 1px inset;   
+}
+
+#make-simple-pred-btn{
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    width: 200px;
+    height: 45px;
+    border-radius: 6px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
+    border: none;
+}
+
+.VaR-share-counts{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    margin-right: auto;
+    margin-left: auto;
+    align-items: center;
+    justify-items: center;
+}
+
+.VaR-share-counts input[type="number"]{
+    width: 150px;
+    height: 45px;
+    border-radius: 6px;
+    padding-left: 10px;
+    border: none;
+    box-shadow: rgb(47, 152, 231) 3px 3px 6px 0px inset, rgba(47, 152, 231, 0.25) -3px -3px 6px 1px inset;   
+}
+
+#monte-chart-container{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 90px;
+}
+
+#VaR-btn-container{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto;
+    margin-right: auto
+}
+
+#monte-carlo-percentiles{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.btn-container{
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    align-items: center;
+    gap: 30px;
+    margin-left: auto;
+    margin-right: auto
+}
+
+.loading-screen{
+    position: fixed;
+    left: 0;
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: #fff; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+}
+
+.main{
+    display: none;
+}
+
+.loading-screen svg{
+    margin-left: auto;
+    margin-right: auto;
+    width: 360px;
+    height: 210px;
+}
+
+#mySvg{
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    height: 210px;
 }

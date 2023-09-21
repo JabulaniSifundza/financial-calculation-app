@@ -19,7 +19,7 @@
 </head>
 <body>
     <div class="loading-screen">
-
+        <img src="/images/myLogo-icon.svg" id="mySvg">
     </div>
     <div class="main">
         <header></header>
@@ -76,12 +76,14 @@
                         <button id="get-current-portfolio" class="optimize-btn">Run Portfolio Optimization</button>
                     </div>
                 </div>
-                <div id="chartContainer"></div>
-                <div id="portfolio-breakdown-1"></div>
-                <div id="chart2Container"></div>
-                <div id="portfolio-breakdown-2"></div>
-                <div id="chart3Container"></div>
-                <div id="portfolio-breakdown-3"></div>
+                <div class="data-charts-portfolio">
+                    <div id="chartContainer"></div>
+                    <div id="portfolio-breakdown-1"></div>
+                    <div id="chart2Container"></div>
+                    <div id="portfolio-breakdown-2"></div>
+                    <div id="chart3Container"></div>
+                    <div id="portfolio-breakdown-3"></div>
+                </div>
             </div>
 
             
@@ -91,27 +93,19 @@
                     <h3>
                         Logistic Regression
                     </h3>
-                    <div id="added-ticker-symbols">
+                    <div id="added-ticker-symbols" class="save-financial-data-div">
                         <select name="Simple model selector" id="simple-model-ticker-selector">
                             <option value="Default" selected>Select a Ticker symbol to model</option>
                         </select>
-                    </div>
 
-                    <div>
-                        <button id="create-simple-model">Create Simple Model</button>
+                        <button id="create-simple-model" class="create-model-btn">Create Simple Model</button>
                     </div>
-                    <div id="model-accuracy">
-
-                    </div>
-                    <div id="prediction-data">
-
-                    </div>
+                    <div id="model-accuracy"></div>
+                    <div id="prediction-data" class="prediction-data"></div>
                     <div>
                         <button id="make-simple-pred-btn">Make Prediction</button>
                     </div>
-                    <div id="prediction-verdict">
-
-                    </div>
+                    <div id="prediction-verdict"></div>
                 </div>
             </div>
             <div class="main-section" id="company-trends">
@@ -120,12 +114,12 @@
                         Company Financial Data
                     </h3>
                     <div class="save-financial-data-div">
-                    <select name="Company Financials Saver Selector" id="save-company-data-selector">
-                        <option value="Default" selected>Select a Ticker symbol to save data for</option>
-                    </select>
-                    <button id="save-company-financial-data" class="save-data-btn">Save Company Data</button>
+                        <select name="Company Financials Saver Selector" id="save-company-data-selector">
+                            <option value="Default" selected>Select a Ticker symbol to save data for</option>
+                        </select>
+                        <button id="save-company-financial-data" class="save-data-btn">Save Company Data</button>
                     </div>
-                    <div>
+                    <div class="save-financial-data-div">
                         <select name="Company Financials Selector" id="company-financials-selector">
                             <option value="Default" selected>Select a Ticker symbol for financial data</option>
                         </select>
@@ -134,9 +128,9 @@
                         </div>
                     </div>
                 </div>
-                <div id="data-visualizations">
-                    <div id="current-asset-breakdown"></div>
-                    <div id="total-liability-breakdown"></div>
+                <div id="data-visualizations" class="data-charts-portfolio">
+                    <div id="current-asset-breakdown" style="width: 600px; height: 600px; display: flex; justify-content: center; align-items: center"></div>
+                    <div id="total-liability-breakdown" style="width: 600px; height: 600px; display: flex; justify-content: center; align-items: center"></div>
                     <div id="asset-liability-comparison" style="width: 600px; height: 500px; display: flex; justify-content: center; align-items: center"></div>
                     <div id="cash-flow-total-line" style="width: 600px; height: 500px; display: flex; justify-content: center; align-items: center"></div>
                     <div id="income-operatingCost-comparison" style="width: 600px; height: 500px; display: flex; justify-content: center; align-items: center"></div>
@@ -152,20 +146,20 @@
                     <h3>
                         Monte Carlo Simulations
                     </h3>
-                    <div>
+                    <div class="save-financial-data-div">
                         <select name="monte-carlo-sim-selector" id="monte-carlo-sim-selector">
                             <option value="Default" selected>Select a Ticker symbol to run simulations</option>
                         </select>
+                        <button id="run-monte-carlo" class="create-model-btn">Run Simulations</button>
                     </div>
-                    <button id="run-monte-carlo">Run Simulations</button>
                 </div>
                 <div id="monte-chart-container"></div>
                 <div id="monte-carlo-percentiles"></div>
-                <div id="VaR-share-count-inputs">
-
-                </div>
+                <div id="VaR-share-count-inputs" class="VaR-share-counts"></div>
                 <div id="VaR-btn-container" style="display: none;">
-                    <button id="calculate-VaR-btn">Calculate VaR</button>
+                    <div class="btn-container">
+                        <button id="calculate-VaR-btn" class="create-model-btn">Calculate VaR</button>
+                    </div>
                 </div>
                 <div id="VaR-calculations"></div>
             </div>
@@ -224,6 +218,8 @@
     <!-- Python Packages and Scripts-->
     <py-config>
       packages = ["numpy", "matplotlib", "pandas", "scikit-learn", "scipy", "statsmodels"]
+      [splashscreen]
+        enabled = false
     </py-config>
     <py-script src="main.py">
         import numpy as np
@@ -233,6 +229,7 @@
         import statsmodels.api as sm
         from js import myFunction
     </py-script>
+    
     
 </body>
 </html>
