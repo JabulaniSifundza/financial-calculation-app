@@ -885,6 +885,6 @@ window.onload = function(){
         duration: 1600,
         easing: 'easeOutExpo',
     })
-    }, 60500);
+    }, 18000);
 }
 
