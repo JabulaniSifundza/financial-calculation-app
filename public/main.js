@@ -838,21 +838,20 @@ anime({
 
 function checkChildren(container){
     const divElement = document.getElementById(container);
-
-    while (true) {
-        if (divElement.childElementCount >= 1) {
-            document.querySelector('.main').style.display = 'none';
-            document.querySelector('.loading-screen').style.display = 'flex';
-            break;
-        }
-        else {
+    if (divElement.childElementCount !== 0) {
+        document.querySelector('.loading-screen').style.display = 'none';
+        document.querySelector('.main').style.display = 'block';
+    }
+    else{
+        document.querySelector('.main').style.display = 'none';
+        document.querySelector('.loading-screen').style.display = 'flex';
+        setTimeout(function() {
             document.querySelector('.loading-screen').style.display = 'none';
             document.querySelector('.main').style.display = 'block';
-        }
+        }, 18000);
     }
+
 }
-
-
 
 
 function longerCheckChildren(container){
