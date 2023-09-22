@@ -26,7 +26,7 @@
         <div class="main-container">
             <div class="main-section" id="company-research">
                 <div class="main-card">
-                    <h2>Company Financials</h2>
+                    <h2>Company Search</h2>
                     <p>
                         Please begin here by adding the ticker symbols for the companies you would like to research.
                         <br>
@@ -34,10 +34,10 @@
                     </p>
                     <div class="" id="capm-container">
                         <h5>
-                            CAPM
+                            CAPM - Capital Asset Pricing Model
                         </h5>
                         <small>
-                            Search companies by their ticker symbols to view financials and calculate various metrics
+                            a financial model that calculates the expected rate of return for an asset or investment. CAPM does this by using the expected return on both the market and a risk-free asset, and the asset's correlation or sensitivity to the market (beta).
                         </small>
                         <div class="ticker-inputs" id="ticker-inputs">
                             <input type="text" name="ticker-symbol" placeholder="Company Ticker" class="ticker-symbol">
@@ -72,6 +72,10 @@
                     <h3>
                         Portfolio Optimization
                     </h3>
+                    <p>
+                        Using Monte Carlo Simulations, Markowitz's Efficient Frontier Theory and Mathematical Optimization, 
+                        we can optimize your current portfolio so we maximize our Sharpe Ratio or find the portfolio composition with the lowest volatility given the companies you added to your portfolio.
+                    </p>
                     <div class="optimize-portfolio-div">
                         <button id="get-current-portfolio" class="optimize-btn">Run Portfolio Optimization</button>
                     </div>
@@ -93,6 +97,9 @@
                     <h3>
                         Logistic Regression
                     </h3>
+                    <p>
+                        Using a very simple Logistic Regression model, we create a Machine Learning model uses the previous Open, High, Low, Adjusted Closing price and Volume to predict or make a recommendation as to whether the user should buy the selected stock or not.
+                    </p>
                     <div id="added-ticker-symbols" class="save-financial-data-div">
                         <select name="Simple model selector" id="simple-model-ticker-selector">
                             <option value="Default" selected>Select a Ticker symbol to model</option>
@@ -113,6 +120,9 @@
                     <h3>
                         Company Financial Data
                     </h3>
+                    <p>
+                        Here you can save all the compiled financial and stock price data for the selected company as an Excel sheet(.xlsx file). You can also visualize company data using various charts and various measures of profitability.
+                    </p>
                     <div class="save-financial-data-div">
                         <select name="Company Financials Saver Selector" id="save-company-data-selector">
                             <option value="Default" selected>Select a Ticker symbol to save data for</option>
@@ -146,6 +156,9 @@
                     <h3>
                         Monte Carlo Simulations
                     </h3>
+                    <p>
+                        This section allows you to run Monte Carlo simulations on the given company's stock price in an attempt to predict the most likely stock price a month away from today.
+                    </p>
                     <div class="save-financial-data-div">
                         <select name="monte-carlo-sim-selector" id="monte-carlo-sim-selector">
                             <option value="Default" selected>Select a Ticker symbol to run simulations</option>
