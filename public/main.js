@@ -841,7 +841,6 @@ function checkChildren(container){
 
     while (true) {
         if (divElement.childElementCount >= 1) {
-
             document.querySelector('.main').style.display = 'none';
             document.querySelector('.loading-screen').style.display = 'flex';
             break;
