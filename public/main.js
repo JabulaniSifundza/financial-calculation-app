@@ -841,13 +841,14 @@ function checkChildren(container){
 
     while (true) {
         if (divElement.childElementCount >= 1) {
-            document.querySelector('.loading-screen').style.display = 'none';
-            document.querySelector('.main').style.display = 'block';
+
+            document.querySelector('.main').style.display = 'none';
+            document.querySelector('.loading-screen').style.display = 'flex';
             break;
         }
         else {
-            document.querySelector('.main').style.display = 'none';
-            document.querySelector('.loading-screen').style.display = 'flex';
+            document.querySelector('.loading-screen').style.display = 'none';
+            document.querySelector('.main').style.display = 'block';
         }
     }
 }
