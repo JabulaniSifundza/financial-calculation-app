@@ -24,11 +24,7 @@
 
 body {
   font-family: 'Avenir-Next Regular', sans-serif;
-}
-
-
-body{
-    background-color: var(--secondary-color);
+  background-color: var(--secondary-color);
 }
 
 header{
@@ -40,6 +36,10 @@ header{
     margin-left: -7.5px;
     width: 100vw;
     margin-bottom: 45px;
+}
+
+h2{
+    font-family: 'Avenir-Next Bold', sans-serif;;
 }
 
 .header-logo{
@@ -65,20 +65,22 @@ footer{
     border-radius: 15px;
     border-top: 1.5px solid var(--placeholder-text);
     box-shadow: rgba(60, 64, 67, 0.3) 0px 2px 4px 0px, rgba(60, 64, 67, 0.15) 0px 4px 9px 4px;
+    font-family: 'Avenir-Next Regular', sans-serif;
 }
 
 .footer-btn{
     display: flex;
     flex-direction: column;
     justify-content: center;
-    margin-top: 12px
+    margin-top: 12px;
+    font-family: 'Avenir-Next Regular', sans-serif;
 }
 
 .footer-btn p{
     text-align: center;
     margin-right: auto;
     margin-left: auto;
-    font-family: 'Jappokki', sans-serif;
+    font-family: 'Avenir-Next Regular', sans-serif;
     font-size: 12px;
     margin-top: 6px;
     align-self: center;
