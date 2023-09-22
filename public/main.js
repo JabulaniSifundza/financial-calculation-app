@@ -838,19 +838,20 @@ anime({
 
 function checkChildren(container){
     const divElement = document.getElementById(container);
-    
-    const checkInterval = setInterval(() => {
+
+    while (true) {
         if (divElement.childElementCount >= 1) {
             document.querySelector('.loading-screen').style.display = 'none';
             document.querySelector('.main').style.display = 'block';
-            clearInterval(checkInterval);
+            break;
         }
         else {
             document.querySelector('.main').style.display = 'none';
             document.querySelector('.loading-screen').style.display = 'flex';
         }
-    }, 1000);
+    }
 }
+
 
 
 
